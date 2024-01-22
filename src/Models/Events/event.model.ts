@@ -29,7 +29,7 @@ interface PollQuestion {
 const eventSchema = new mongoose.Schema({
   owner: {
     type: Schema.Types.ObjectId,
-    ref: "Organization",
+    ref: "User",
   },
   eventName: {
     type: String,
@@ -54,7 +54,7 @@ const eventSchema = new mongoose.Schema({
     {
       runfor: String,
       candidateId: Schema.Types.ObjectId,
-      ref: "Elector",
+      ref: "User",
       voteCount: Number,
       voters: [],
     },
