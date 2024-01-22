@@ -1,26 +1,36 @@
 import mongoose, { Schema, ObjectId } from "mongoose";
 
-export interface IElector {
+export interface IUser {
   id?: string;
   password: string;
   email: string;
   fullName?: string;
+  companyName?: string;
   OTP?: number | string;
   otpExpiresAt?: number;
   isEmailVerified?: boolean;
   createdAt?: string;
   role?: string;
   phoneNumber?: string;
-  organizations?: string[];
+  address?: string;
   displayPicture?: string | undefined;
   displayPictureId?: string | undefined;
-  location?: string;
+  logo?: string | undefined;
+  logoId?: string | undefined;
   position?: string;
+  location?: string;
+  organizations?: string[];
+  members?: string[];
+  numberOfStaff?: number;
+  eventsConducted?: number;
   eventsEngaged?: number;
   eventsOngoing?: number;
 }
 
-const electorSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
+  companyName: {
+    type: String,
+  },
   fullName: {
     type: String,
   },
@@ -31,6 +41,12 @@ const electorSchema = new mongoose.Schema({
     type: String,
   },
   displayPictureId: {
+    type: String,
+  },
+  logo: {
+    type: String,
+  },
+  logoId: {
     type: String,
   },
   email: {
@@ -45,18 +61,32 @@ const electorSchema = new mongoose.Schema({
   organizations: [
     {
       type: Schema.Types.ObjectId,
-      ref: "Organization",
+      ref: "User",
+    },
+  ],
+  members: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
   ],
   location: {
     type: String,
   },
+  address: {
+    type: String,
+  },
+  numberOfStaff: {
+    type: String,
+  },
   role: {
     type: String,
     enum: ["Elector", "Organization", "Admin"],
-    default: "Elector",
   },
   eventsEngaged: {
+    type: Number,
+  },
+  eventsConducted: {
     type: Number,
   },
   eventsOngoing: {
@@ -84,4 +114,4 @@ const electorSchema = new mongoose.Schema({
   },
 });
 
-export const Elector = mongoose.model("Elector", electorSchema);
+export const User = mongoose.model("User", userSchema);
