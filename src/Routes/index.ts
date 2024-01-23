@@ -6,12 +6,12 @@ import organization from "./Organizations/organization.route";
 const router = Router();
 
 // authentication routes
-router.use(authRoute);
+router.use("/auth", authRoute);
 
 // elector routes
-router.use(electorRoute);
+router.use("/elector", electorRoute);
 
 // organization routes
-router.use(organization);
+router.use("/organization", organization);
 
 export default router;
