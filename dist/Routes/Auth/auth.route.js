@@ -10,4 +10,7 @@ const reqValidation_middleware_1 = __importDefault(require("../../Middlewares/re
 const router = (0, express_1.Router)();
 router.post("/elector/signUp", (0, auth_middleware_1.electorSignUpValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.signUp);
 router.post("/organization/signUp", (0, auth_middleware_1.organizationSignUpValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.signUp);
+router.post("/activateAccount", (0, auth_middleware_1.otpValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.activateUserAccount);
+router.post("/resendOTP", (0, auth_middleware_1.emailValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.resendOTP);
+router.post("/login", (0, auth_middleware_1.loginValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.login);
 exports.default = router;

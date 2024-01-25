@@ -23,7 +23,9 @@ export default class UserRepository {
   async findUserByEmail(userEmail: string): Promise<IUser | null> {
     const result: any = await User.findOne({
       email: userEmail,
-    }).exec();
+    })
+      .select("+password")
+      .exec();
     return result;
   }
 

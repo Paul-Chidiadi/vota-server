@@ -29,3 +29,67 @@ export const signUp = async (
     );
   }
 };
+
+export const activateUserAccount = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await authService.activateUserAccount(req, next);
+    if (result) {
+      return res.status(statusCode.accepted()).json({
+        success: true,
+        message: "Email verification successful, please login to continue",
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong here is the error ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};
+
+export const resendOTP = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await authService.resendOTP(req, next);
+    if (result) {
+      return res.status(statusCode.ok()).json({
+        success: true,
+        message: "OTP sent successful, please check your email",
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong here is the error ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};
+
+export const login = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await authService.login(req, res, next);
+    return result;
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong here is the error ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};

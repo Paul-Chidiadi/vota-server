@@ -52,3 +52,33 @@ export const organizationSignUpValidationRules = () => {
     body("email").trim().isEmail().withMessage("please enter a valid Email"),
   ];
 };
+
+export const otpValidationRules = () => {
+  return [
+    body("OTP")
+      .trim()
+      .isLength({ min: 6, max: 6 })
+      .withMessage("OTP code must be 4 digit long"),
+    body("email").trim().isEmail().withMessage("please enter a valid email"),
+  ];
+};
+
+export const emailValidationRules = () => {
+  return [
+    body("email").trim().isEmail().withMessage("please enter a valid email"),
+  ];
+};
+
+export const loginValidationRules = () => {
+  return [
+    body("email").trim().isEmail().withMessage("please enter a valid email"),
+    body("password")
+      .trim()
+      .notEmpty()
+      .withMessage("Password can not be empty")
+      .isLength({ min: 6, max: 16 })
+      .withMessage(
+        "Password must be between min of 6 and max of 16 characters"
+      ),
+  ];
+};

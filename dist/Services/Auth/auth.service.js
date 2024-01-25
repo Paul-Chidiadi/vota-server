@@ -86,5 +86,83 @@ class AuthService {
             return next(new appError_1.default("Email address already exist", utils_1.statusCode.conflict()));
         });
     }
+    activateUserAccount(req, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { OTP, email } = req.body;
+            const user = yield userRepository.findUserByCodeAndEmail(email, OTP);
+            const otpExpiresAt = Date.parse(user === null || user === void 0 ? void 0 : user.otpExpiresAt);
+            if (otpExpiresAt !== undefined && Date.now() > otpExpiresAt) {
+                return next(new appError_1.default("Invalid OTP or OTP has expired", utils_1.statusCode.badRequest()));
+            }
+            if (user === null) {
+                return next(new appError_1.default("Resource for user not found", utils_1.statusCode.notFound()));
+            }
+            if (user.OTP !== OTP) {
+                return next(new appError_1.default("Invalid otp", utils_1.statusCode.unauthorized()));
+            }
+            if (user.isEmailVerified) {
+                return next(new appError_1.default("Email already verified", utils_1.statusCode.unauthorized()));
+            }
+            const result = yield authRepository.activateUserAccount(email);
+            if (result) {
+                const userInfo = {
+                    email: result.email,
+                    subject: "Welcome to VOTA",
+                };
+                // await mail.accountActivationMail(userInfo);
+                return user;
+            }
+        });
+    }
+    resendOTP(req, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { email } = req.body;
+            const user = yield userRepository.findUserByEmail(email);
+            if (user === null) {
+                return next(new appError_1.default("User not found", utils_1.statusCode.notFound()));
+            }
+            const { OTP, otpExpiresAt } = yield util.generateOtpCode();
+            const result = yield authRepository.UpdateOTP(email, OTP, otpExpiresAt);
+            const userInfo = {
+                email,
+                subject: "OTP Verification Code",
+                otp: OTP,
+            };
+            // await mail.sendOTP(userInfo);
+            return result;
+        });
+    }
+    login(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { email, password } = req.body;
+            const user = yield userRepository.findUserByEmail(email);
+            if (!user) {
+                return next(new appError_1.default("Incorrect Email or password", utils_1.statusCode.unprocessableEntity()));
+            }
+            const isActive = yield userRepository.isVerified(email);
+            if (!isActive) {
+                return next(new appError_1.default("User account is not active, Kindly activate account", utils_1.statusCode.unauthorized()));
+            }
+            // if user is active then proceed to further operations
+            const hashedPassword = yield util.comparePassword(password, user.password);
+            if (hashedPassword) {
+                const { accessToken, refreshToken } = yield util.generateToken(user.email);
+                // send a mail to the user email on successful login attempt
+                res.cookie("jwt", refreshToken, {
+                    maxAge: 24 * 60 * 60 * 1000,
+                });
+                res.status(utils_1.statusCode.accepted()).json({
+                    success: true,
+                    message: "Login successful",
+                    accessToken,
+                    refreshToken,
+                    user,
+                });
+            }
+            else {
+                return next(new appError_1.default("Incorrect password", utils_1.statusCode.accessForbidden()));
+            }
+        });
+    }
 }
 exports.default = AuthService;
