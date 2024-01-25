@@ -13,4 +13,7 @@ router.post("/organization/signUp", (0, auth_middleware_1.organizationSignUpVali
 router.post("/activateAccount", (0, auth_middleware_1.otpValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.activateUserAccount);
 router.post("/resendOTP", (0, auth_middleware_1.emailValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.resendOTP);
 router.post("/login", (0, auth_middleware_1.loginValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.login);
+router.get("/refreshToken", (0, auth_middleware_1.refreshTokenValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.refreshToken);
+router.post("/forgotPassword", (0, auth_middleware_1.emailValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.forgotPassword);
+router.post("/resetPassword", (0, auth_middleware_1.resetPasswordValidationRules)(), reqValidation_middleware_1.default, auth_controller_1.resetPassword);
 exports.default = router;

@@ -35,7 +35,9 @@ class UserRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield user_model_1.User.findOne({
                 email: userEmail,
-            }).exec();
+            })
+                .select("+password")
+                .exec();
             return result;
         });
     }

@@ -45,11 +45,11 @@ export default class AuthService {
         isEmailVerified: data.isEmailVerified,
       };
       if (data) {
-        // const userInfo = {
-        //   email: data.email,
-        //   subject: "Verify your VOTA Account",
-        //   otp: data.OTP,
-        // };
+        const userInfo = {
+          email: data.email,
+          subject: "Verify your VOTA Account",
+          otp: data.OTP,
+        };
         // await mail.sendOTP(userInfo);
         return newUser as IUser;
       }
@@ -166,5 +166,101 @@ export default class AuthService {
         new AppError("Incorrect password", statusCode.accessForbidden())
       );
     }
+  }
+
+  public async refreshToken(req: Request, res: Response, next: NextFunction) {
+    const email = req.headers["x-user-email"] as string;
+    const token = req.headers["x-user-token"] as string;
+    const response = await userRepository.findUserByEmail(email);
+    const user = await userRepository.findOneUser(
+      response?.id as unknown as string
+    );
+    if (!user) {
+      return next(
+        new AppError("User with this email not found", statusCode.notFound())
+      );
+    }
+    const isValid = await util.verifyToken(email, token);
+    if (isValid) {
+      const { accessToken, refreshToken } = await util.generateToken(email);
+      user.password = "undefined";
+      return res.status(200).json({
+        accessToken,
+        refreshToken,
+        data: user,
+      });
+    }
+    return next(
+      new AppError(
+        "Invalid token. Please login to gain access",
+        statusCode.unauthorized()
+      )
+    );
+  }
+
+  public async forgotPassword(req: Request, next: NextFunction) {
+    const { email } = req.body;
+    const user = await userRepository.findUserByEmail(email);
+    if (!user) {
+      return next(new AppError("User not found", statusCode.notFound()));
+    }
+    const { OTP, otpExpiresAt } = await util.generateOtpCode();
+    const data = {
+      email: user.email,
+      otp: OTP,
+      subject: "Forgot Password Notification",
+    };
+    // SEND MAIL
+    const sendEmail = await mail.forgotPasswordMail(data);
+    if (sendEmail) {
+      await authRepository.UpdateOTP(email, OTP, otpExpiresAt);
+      return user;
+    }
+    return next(
+      new AppError(
+        "Notification failed, try again later",
+        statusCode.noContent()
+      )
+    );
+  }
+
+  public async resetPassword(req: Request, next: NextFunction) {
+    const { newPassword, confirmPassword, OTP, email } = req.body;
+    const password =
+      newPassword === confirmPassword
+        ? newPassword
+        : next(new AppError("passwords don't match", statusCode.badRequest()));
+    // HASH PASSWORD
+    const hashPassword = await util.generateHash(password);
+    const user = await userRepository.findUserByEmail(email);
+    if (!user) {
+      return next(new AppError("user not found", statusCode.notFound()));
+    }
+    if (OTP !== String(user.OTP)) {
+      return next(new AppError("Invalid OTP", statusCode.badRequest()));
+    }
+    const otpExpiresAt = Date.parse(user?.otpExpiresAt as unknown as string);
+    if (Date.now() > otpExpiresAt) {
+      return next(
+        new AppError("Invalid OTP or OTP has expired", statusCode.badRequest())
+      );
+    }
+    const userData = { hashPassword, email };
+    const resetUser: IUser | false = await authRepository.resetPassword(
+      userData.email,
+      userData.hashPassword
+    );
+
+    if (!resetUser) {
+      return next(
+        new AppError("Error updating password", statusCode.badRequest())
+      );
+    }
+    const data = {
+      email,
+      subject: "Password Reset Notification",
+    };
+    // await mail.resetPasswordMail(data);
+    return resetUser;
   }
 }

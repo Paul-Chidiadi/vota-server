@@ -74,11 +74,11 @@ class AuthService {
                     isEmailVerified: data.isEmailVerified,
                 };
                 if (data) {
-                    // const userInfo = {
-                    //   email: data.email,
-                    //   subject: "Verify your VOTA Account",
-                    //   otp: data.OTP,
-                    // };
+                    const userInfo = {
+                        email: data.email,
+                        subject: "Verify your VOTA Account",
+                        otp: data.OTP,
+                    };
                     // await mail.sendOTP(userInfo);
                     return newUser;
                 }
@@ -162,6 +162,82 @@ class AuthService {
             else {
                 return next(new appError_1.default("Incorrect password", utils_1.statusCode.accessForbidden()));
             }
+        });
+    }
+    refreshToken(req, res, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const email = req.headers["x-user-email"];
+            const token = req.headers["x-user-token"];
+            const response = yield userRepository.findUserByEmail(email);
+            const user = yield userRepository.findOneUser(response === null || response === void 0 ? void 0 : response.id);
+            if (!user) {
+                return next(new appError_1.default("User with this email not found", utils_1.statusCode.notFound()));
+            }
+            const isValid = yield util.verifyToken(email, token);
+            if (isValid) {
+                const { accessToken, refreshToken } = yield util.generateToken(email);
+                user.password = "undefined";
+                return res.status(200).json({
+                    accessToken,
+                    refreshToken,
+                    data: user,
+                });
+            }
+            return next(new appError_1.default("Invalid token. Please login to gain access", utils_1.statusCode.unauthorized()));
+        });
+    }
+    forgotPassword(req, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { email } = req.body;
+            const user = yield userRepository.findUserByEmail(email);
+            if (!user) {
+                return next(new appError_1.default("User not found", utils_1.statusCode.notFound()));
+            }
+            const { OTP, otpExpiresAt } = yield util.generateOtpCode();
+            const data = {
+                email: user.email,
+                otp: OTP,
+                subject: "Forgot Password Notification",
+            };
+            // SEND MAIL
+            const sendEmail = yield mail.forgotPasswordMail(data);
+            if (sendEmail) {
+                yield authRepository.UpdateOTP(email, OTP, otpExpiresAt);
+                return user;
+            }
+            return next(new appError_1.default("Notification failed, try again later", utils_1.statusCode.noContent()));
+        });
+    }
+    resetPassword(req, next) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { newPassword, confirmPassword, OTP, email } = req.body;
+            const password = newPassword === confirmPassword
+                ? newPassword
+                : next(new appError_1.default("passwords don't match", utils_1.statusCode.badRequest()));
+            // HASH PASSWORD
+            const hashPassword = yield util.generateHash(password);
+            const user = yield userRepository.findUserByEmail(email);
+            if (!user) {
+                return next(new appError_1.default("user not found", utils_1.statusCode.notFound()));
+            }
+            if (OTP !== String(user.OTP)) {
+                return next(new appError_1.default("Invalid OTP", utils_1.statusCode.badRequest()));
+            }
+            const otpExpiresAt = Date.parse(user === null || user === void 0 ? void 0 : user.otpExpiresAt);
+            if (Date.now() > otpExpiresAt) {
+                return next(new appError_1.default("Invalid OTP or OTP has expired", utils_1.statusCode.badRequest()));
+            }
+            const userData = { hashPassword, email };
+            const resetUser = yield authRepository.resetPassword(userData.email, userData.hashPassword);
+            if (!resetUser) {
+                return next(new appError_1.default("Error updating password", utils_1.statusCode.badRequest()));
+            }
+            const data = {
+                email,
+                subject: "Password Reset Notification",
+            };
+            // await mail.resetPasswordMail(data);
+            return resetUser;
         });
     }
 }

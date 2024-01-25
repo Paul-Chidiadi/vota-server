@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.login = exports.resendOTP = exports.activateUserAccount = exports.signUp = void 0;
+exports.resetPassword = exports.forgotPassword = exports.refreshToken = exports.login = exports.resendOTP = exports.activateUserAccount = exports.signUp = void 0;
 const auth_service_1 = __importDefault(require("../../Services/Auth/auth.service"));
 const appError_1 = __importDefault(require("../../Utilities/Errors/appError"));
 const utils_1 = require("../../Utilities/utils");
@@ -73,3 +73,43 @@ const login = (req, res, next) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.login = login;
+const refreshToken = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const verifiedToken = yield authService.refreshToken(req, res, next);
+        return verifiedToken;
+    }
+    catch (error) {
+        return next(new appError_1.default(`something went wrong here is the error ${error}`, utils_1.statusCode.internalServerError()));
+    }
+});
+exports.refreshToken = refreshToken;
+const forgotPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield authService.forgotPassword(req, next);
+        if (user) {
+            return res.status(utils_1.statusCode.accepted()).json({
+                success: true,
+                message: "A passowrd reset code has been sent to your email Successfully.",
+            });
+        }
+    }
+    catch (error) {
+        return next(new appError_1.default(`something went wrong here is the error ${error}`, utils_1.statusCode.internalServerError()));
+    }
+});
+exports.forgotPassword = forgotPassword;
+const resetPassword = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = yield authService.resetPassword(req, next);
+        if (result) {
+            return res.status(utils_1.statusCode.ok()).json({
+                success: true,
+                message: "Password reset successfully",
+            });
+        }
+    }
+    catch (error) {
+        return next(new appError_1.default(`something went wrong here is the error ${error}`, utils_1.statusCode.internalServerError()));
+    }
+});
+exports.resetPassword = resetPassword;
