@@ -43,7 +43,7 @@ const authenticate = async (
         success: false,
       });
     }
-    // req.user = currentUser;
+    req.user = currentUser;
     next();
   } catch (error) {
     return next(

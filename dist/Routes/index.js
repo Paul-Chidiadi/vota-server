@@ -10,6 +10,8 @@ const organization_route_1 = __importDefault(require("./Organizations/organizati
 const router = (0, express_1.Router)();
 // authentication routes
 router.use("/auth", auth_route_1.default);
+// global routes
+router.use("/global", organization_route_1.default);
 // elector routes
 router.use("/elector", elector_route_1.default);
 // organization routes

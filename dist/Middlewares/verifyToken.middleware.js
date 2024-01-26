@@ -47,7 +47,7 @@ const authenticate = (req, res, next) => __awaiter(void 0, void 0, void 0, funct
                 success: false,
             });
         }
-        // req.user = currentUser;
+        req.user = currentUser;
         next();
     }
     catch (error) {
