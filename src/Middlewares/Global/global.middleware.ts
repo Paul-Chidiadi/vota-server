@@ -15,6 +15,7 @@ export const editProfileValidationRules = () => {
       .withMessage("Company Name can not be empty"),
     body("phoneNumber")
       .trim()
+      .optional()
       .notEmpty()
       .withMessage("Phone Number can not be empty"),
     body("location")

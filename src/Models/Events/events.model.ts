@@ -10,7 +10,7 @@ export interface IEvent {
   positions?: string[];
   candidates?: Candidate[];
   pollQuestions?: PollQuestion[];
-  public?: boolean;
+  isPublic?: boolean;
 }
 
 interface Candidate {
@@ -53,8 +53,7 @@ const eventSchema = new mongoose.Schema({
   candidates: [
     {
       runfor: String,
-      candidateId: Schema.Types.ObjectId,
-      ref: "User",
+      candidateId: { type: Schema.Types.ObjectId, ref: "User" },
       voteCount: Number,
       voters: [],
     },
@@ -66,7 +65,7 @@ const eventSchema = new mongoose.Schema({
       voters: [],
     },
   ],
-  public: {
+  isPublic: {
     type: Boolean,
   },
   createdAt: {

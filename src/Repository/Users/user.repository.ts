@@ -9,13 +9,13 @@ export default class UserRepository {
   async findOneUser(id: string): Promise<IUser | null> {
     const user: any = await User.findOne({ _id: id })
       .lean()
-      .select("+password -isActive -OTP -__v");
+      .select("-OTP -__v");
     return user as IUser;
   }
 
   async findUserById(userId: string): Promise<IUser | null> {
     const user: any = await User.findById(userId).select(
-      "-password -isEmailVerified -displayPictureId"
+      "-password -isEmailVerified"
     );
     return user as IUser;
   }
