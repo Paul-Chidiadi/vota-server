@@ -12,6 +12,7 @@ import {
   getAllOrganizationsEvent,
   getAllOrganizationsMembers,
   addMemberRequest,
+  removeMember,
 } from "../../Controllers/Organizations/organization.controller";
 import validate from "../../Middlewares/reqValidation.middleware";
 import authenticate from "../../Middlewares/verifyToken.middleware";
@@ -41,5 +42,6 @@ router.get(
   getAllOrganizationsMembers
 );
 router.post("/addMemberRequest/:memberId", authenticate, addMemberRequest);
+router.patch("/removeMember/:memberId", authenticate, removeMember);
 
 export default router;

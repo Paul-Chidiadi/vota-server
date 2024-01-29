@@ -175,3 +175,27 @@ export const addMemberRequest = async (
     );
   }
 };
+
+export const removeMember = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const member = await organizationService.removeMember(req, next);
+    if (member) {
+      return res.status(statusCode.ok()).json({
+        status: "success",
+        message: "Member removed successfully",
+        member,
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};

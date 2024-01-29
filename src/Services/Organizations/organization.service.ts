@@ -171,4 +171,36 @@ export default class OrganizationService {
     }
     return next(new AppError("Failed to send request", statusCode.conflict()));
   }
+
+  public async removeMember(
+    req: any,
+    next: NextFunction
+  ): Promise<IUser | void> {
+    const user = req.user;
+    const { memberId } = req.params;
+    const organization = await userRepository.findUserById(user.id);
+    const members = organization?.members;
+    if (!members?.includes(memberId)) {
+      return next(
+        new AppError("This User is not your member", statusCode.conflict())
+      );
+    }
+    const deletedMember = await userRepository.removeMember(user.id, memberId);
+    //if member is removed successfully then insert into notification schema and then send notification
+    if (deletedMember) {
+      const notificationPayload: INotification = {
+        senderId: user.id,
+        recipientId: memberId,
+        notificationType: "Remove Member",
+        notificationMessage: "Removed you from their organization",
+      };
+      const notificationData = await notificationRepository.createNotification(
+        notificationPayload
+      );
+      if (notificationData) {
+        return deletedMember as IUser;
+      }
+    }
+    return next(new AppError("Failed to remove member", statusCode.conflict()));
+  }
 }

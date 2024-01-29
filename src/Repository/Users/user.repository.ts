@@ -68,4 +68,13 @@ export default class UserRepository {
     const user: any = await User.findByIdAndDelete({ _id: userId });
     return user as IUser;
   }
+
+  async removeMember(userId: string, memberId: string): Promise<IUser> {
+    const user: any = await User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { members: memberId } },
+      { new: true }
+    );
+    return user as IUser;
+  }
 }
