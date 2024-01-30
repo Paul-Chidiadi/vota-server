@@ -6,6 +6,11 @@ export default class UserRepository {
     return users as any;
   }
 
+  async findUsersByRole(role: string): Promise<IUser[] | null> {
+    const users = await User.find({ role: role });
+    return users as any;
+  }
+
   async findOneUser(id: string): Promise<IUser | null> {
     const user: any = await User.findOne({ _id: id })
       .lean()

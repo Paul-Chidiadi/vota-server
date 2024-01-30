@@ -5,6 +5,57 @@ import { statusCode } from "../../Utilities/utils";
 
 const organizationService = new OrganizationService();
 
+export const getAllOrganization = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const organization = await organizationService.getAllOrganization(
+      req,
+      next
+    );
+    if (organization) {
+      return res.status(statusCode.created()).json({
+        status: "success",
+        message: "Successful",
+        data: organization,
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};
+
+export const getOrganization = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const event = await organizationService.getOrganization(req, next);
+    if (event) {
+      return res.status(statusCode.created()).json({
+        status: "success",
+        message: "Successful",
+        data: event,
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};
+
 export const createEvent = async (
   req: Request,
   res: Response,
@@ -16,7 +67,7 @@ export const createEvent = async (
       return res.status(statusCode.created()).json({
         status: "success",
         message: "Event successfully Created",
-        event,
+        data: event,
       });
     }
   } catch (err) {
@@ -40,7 +91,7 @@ export const editEvent = async (
       return res.status(statusCode.created()).json({
         status: "success",
         message: "Event updated successfully",
-        event,
+        data: event,
       });
     }
   } catch (err) {
@@ -64,7 +115,7 @@ export const cancelEvent = async (
       return res.status(statusCode.ok()).json({
         status: "success",
         message: "Event cancelled successfully",
-        event,
+        data: event,
       });
     }
   } catch (err) {
@@ -88,7 +139,7 @@ export const endEvent = async (
       return res.status(statusCode.created()).json({
         status: "success",
         message: "Event cancelled successfully",
-        event,
+        data: event,
       });
     }
   } catch (err) {
@@ -112,7 +163,7 @@ export const getAllOrganizationsEvent = async (
       return res.status(statusCode.created()).json({
         status: "success",
         message: "Successful",
-        event,
+        data: event,
       });
     }
   } catch (err) {
@@ -139,7 +190,7 @@ export const getAllOrganizationsMembers = async (
       return res.status(statusCode.created()).json({
         status: "success",
         message: "Successful",
-        members,
+        data: members,
       });
     }
   } catch (err) {
@@ -163,7 +214,7 @@ export const addMemberRequest = async (
       return res.status(statusCode.created()).json({
         status: "success",
         message: "Request successfully sent",
-        member,
+        data: member,
       });
     }
   } catch (err) {
@@ -187,7 +238,7 @@ export const removeMember = async (
       return res.status(statusCode.ok()).json({
         status: "success",
         message: "Member removed successfully",
-        member,
+        data: member,
       });
     }
   } catch (err) {

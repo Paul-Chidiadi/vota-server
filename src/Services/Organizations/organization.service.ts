@@ -16,6 +16,38 @@ const util = new Utilities();
 const mail = new MalierService();
 
 export default class OrganizationService {
+  public async getAllOrganization(
+    req: any,
+    next: NextFunction
+  ): Promise<IUser[] | void> {
+    const user = req.user;
+    if (user) {
+      const role = "Organization";
+      const organization = await userRepository.findUsersByRole(role);
+      if (organization) {
+        return organization as IUser[];
+      }
+      return next(new AppError("Not found", statusCode.notFound()));
+    }
+    return next(new AppError("Unauthorized access", statusCode.unauthorized()));
+  }
+
+  public async getOrganization(
+    req: any,
+    next: NextFunction
+  ): Promise<IUser | void> {
+    const user = req.user;
+    const { organizationId } = req.params;
+    if (user) {
+      const organization = await userRepository.findUserById(organizationId);
+      if (organization) {
+        return organization as IUser;
+      }
+      return next(new AppError("Oganization not found", statusCode.notFound()));
+    }
+    return next(new AppError("Unauthorized access", statusCode.unauthorized()));
+  }
+
   public async createEvent(
     req: any,
     next: NextFunction

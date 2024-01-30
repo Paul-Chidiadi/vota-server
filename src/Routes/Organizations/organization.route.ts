@@ -13,6 +13,8 @@ import {
   getAllOrganizationsMembers,
   addMemberRequest,
   removeMember,
+  getAllOrganization,
+  getOrganization,
 } from "../../Controllers/Organizations/organization.controller";
 import validate from "../../Middlewares/reqValidation.middleware";
 import authenticate from "../../Middlewares/verifyToken.middleware";
@@ -26,6 +28,8 @@ router.post(
   authenticate,
   createEvent
 );
+router.get("/getOrganization", authenticate, getAllOrganization);
+router.get("/:organizationId", authenticate, getOrganization);
 router.patch(
   "/editEvent/:eventId",
   editEventValidationRules(),
