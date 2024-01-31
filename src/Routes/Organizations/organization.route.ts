@@ -28,6 +28,12 @@ router.post(
   authenticate,
   createEvent
 );
+router.get("/getAllOrganizationsEvent", authenticate, getAllOrganizationsEvent);
+router.get(
+  "/getAllOrganizationsMembers",
+  authenticate,
+  getAllOrganizationsMembers
+);
 router.get("/getOrganization", authenticate, getAllOrganization);
 router.get("/:organizationId", authenticate, getOrganization);
 router.patch(
@@ -39,12 +45,6 @@ router.patch(
 );
 router.delete("/cancelEvent/:eventId", authenticate, cancelEvent);
 router.patch("/endEvent/:eventId", authenticate, endEvent);
-router.get("/getAllOrganizationsEvent", authenticate, getAllOrganizationsEvent);
-router.get(
-  "/getAllOrganizationsMembers",
-  authenticate,
-  getAllOrganizationsMembers
-);
 router.post("/addMemberRequest/:memberId", authenticate, addMemberRequest);
 router.patch("/removeMember/:memberId", authenticate, removeMember);
 

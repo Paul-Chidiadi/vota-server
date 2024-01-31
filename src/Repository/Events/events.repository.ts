@@ -23,8 +23,8 @@ export default class EventRepository {
     return event as IEvent;
   }
 
-  async findAllOrganizationsEvent(ownerId: string): Promise<IEvent[] | null> {
-    const event = await Event.find({ owner: ownerId });
-    return event as any;
+  async findAllOrganizationsEvent(ownerId: string): Promise<IEvent[]> {
+    const events = await Event.find({ owner: ownerId });
+    return events as any;
   }
 }

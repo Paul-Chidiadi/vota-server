@@ -38,12 +38,12 @@ export const getOrganization = async (
   next: NextFunction
 ) => {
   try {
-    const event = await organizationService.getOrganization(req, next);
-    if (event) {
+    const organization = await organizationService.getOrganization(req, next);
+    if (organization) {
       return res.status(statusCode.created()).json({
         status: "success",
         message: "Successful",
-        data: event,
+        data: organization,
       });
     }
   } catch (err) {
