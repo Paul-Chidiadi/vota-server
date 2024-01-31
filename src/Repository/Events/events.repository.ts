@@ -6,6 +6,15 @@ export default class EventRepository {
     return event as IEvent;
   }
 
+  async findEvents(): Promise<IEvent[] | null> {
+    const events = await Event.find();
+    return events as any;
+  }
+  async findOneEvent(id: string): Promise<IEvent | null> {
+    const event: any = await Event.findOne({ _id: id }).lean().select("-__v");
+    return event as IEvent;
+  }
+
   async findEventByIdAndUpdate(
     id: string,
     payload: IEvent

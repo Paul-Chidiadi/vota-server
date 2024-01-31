@@ -9,6 +9,7 @@ import {
   editProfile,
   editPassword,
   editEmail,
+  getEvent,
 } from "../../Controllers/Global/global.controller";
 import validate from "../../Middlewares/reqValidation.middleware";
 import authenticate from "../../Middlewares/verifyToken.middleware";
@@ -36,5 +37,6 @@ router.patch(
   authenticate,
   editEmail
 );
+router.get("/getEvent/:eventId", authenticate, getEvent);
 
 export default router;

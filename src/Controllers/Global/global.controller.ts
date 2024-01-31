@@ -76,3 +76,27 @@ export const editEmail = async (
     );
   }
 };
+
+export const getEvent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const event = await globalService.getEvent(req, next);
+    if (event) {
+      return res.status(statusCode.created()).json({
+        status: "success",
+        message: "Successful",
+        event,
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};

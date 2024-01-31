@@ -2,12 +2,15 @@ import { Request, Response, NextFunction } from "express";
 import AppError from "../../Utilities/Errors/appError";
 import AuthRepository from "../../Repository/Auth/auth.repository";
 import UserRepository from "../../Repository/Users/user.repository";
+import EventRepository from "../../Repository/Events/events.repository";
 import { IUser } from "../../Models/Users/user.model";
 import Utilities, { statusCode } from "../../Utilities/utils";
 import { MalierService } from "../Email/mailer";
+import { IEvent } from "../../Models/Events/events.model";
 
 const authRepository = new AuthRepository();
 const userRepository = new UserRepository();
+const eventRepository = new EventRepository();
 const util = new Utilities();
 const mail = new MalierService();
 
@@ -113,5 +116,15 @@ export default class GLobalService {
     return next(
       new AppError("Email update failed, Try again", statusCode.conflict())
     );
+  }
+
+  public async getEvent(req: any, next: NextFunction): Promise<IEvent | void> {
+    const user = req.user;
+    const { eventId } = req.params;
+    const eventData: any = await eventRepository.findOneEvent(eventId);
+    if (eventData) {
+      return eventData;
+    }
+    return next(new AppError("Event does not exist", statusCode.notFound()));
   }
 }
