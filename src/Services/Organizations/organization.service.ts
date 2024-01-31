@@ -217,9 +217,15 @@ export default class OrganizationService {
         new AppError("This User is not your member", statusCode.conflict())
       );
     }
+    // Remove member from organization's members list
     const deletedMember = await userRepository.removeMember(user.id, memberId);
+    // Remove organization from elector's organizations list
+    const deleteOrganization = await userRepository.removeOrganization(
+      memberId,
+      user.id
+    );
     //if member is removed successfully then insert into notification schema and then send notification
-    if (deletedMember) {
+    if (deletedMember && deleteOrganization) {
       const notificationPayload: INotification = {
         senderId: user.id,
         recipientId: memberId,

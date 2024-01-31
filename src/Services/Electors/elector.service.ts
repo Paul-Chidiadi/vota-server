@@ -87,4 +87,75 @@ export default class ElectorService {
     }
     return eventData;
   }
+
+  public async joinOrganizationRequest(
+    req: any,
+    next: NextFunction
+  ): Promise<INotification | void> {
+    const user = req.user;
+    const { organizationId } = req.params;
+    const elector = await userRepository.findUserById(user.id);
+    const organizations = elector?.organizations;
+    if (organizations?.includes(organizationId)) {
+      return next(new AppError("Joined Already", statusCode.conflict()));
+    }
+    const payload: INotification = {
+      senderId: user.id,
+      recipientId: organizationId,
+      notificationType: "Join Organization Request",
+      notificationMessage: "Wants to join your Organization",
+    };
+    const notificationData = await notificationRepository.createNotification(
+      payload
+    );
+    if (notificationData) {
+      return notificationData as INotification;
+    }
+    return next(new AppError("Failed to send request", statusCode.conflict()));
+  }
+
+  public async leaveOrganization(
+    req: any,
+    next: NextFunction
+  ): Promise<IUser | void> {
+    const user = req.user;
+    const { organizationId } = req.params;
+    const elector = await userRepository.findUserById(user.id);
+    const organizations = elector?.organizations;
+    if (organizations?.includes(organizationId)) {
+      // Remove organization from elector's organizations list
+      const deleteOrganization = await userRepository.removeOrganization(
+        user.id,
+        organizationId
+      );
+      // Remove member from organization's members list
+      const deletedMember = await userRepository.removeMember(
+        organizationId,
+        user.id
+      );
+      //if organization is left successfully then insert into notification schema and then send notification
+      if (deleteOrganization && deletedMember) {
+        const notificationPayload: INotification = {
+          senderId: user.id,
+          recipientId: organizationId,
+          notificationType: "Leave Organization",
+          notificationMessage: "Left your Organization",
+        };
+        const notificationData =
+          await notificationRepository.createNotification(notificationPayload);
+        if (notificationData) {
+          return deletedMember as IUser;
+        }
+      }
+      return next(
+        new AppError("Failed to leave organization", statusCode.conflict())
+      );
+    }
+    return next(
+      new AppError(
+        "You are not part of this organization",
+        statusCode.conflict()
+      )
+    );
+  }
 }

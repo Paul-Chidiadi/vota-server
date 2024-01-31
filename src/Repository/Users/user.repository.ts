@@ -82,4 +82,16 @@ export default class UserRepository {
     );
     return user as IUser;
   }
+
+  async removeOrganization(
+    userId: string,
+    organizationId: string
+  ): Promise<IUser> {
+    const user: any = await User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { organizations: organizationId } },
+      { new: true }
+    );
+    return user as IUser;
+  }
 }

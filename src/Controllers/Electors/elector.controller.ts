@@ -103,3 +103,51 @@ export const getAllElectorsEvent = async (
     );
   }
 };
+
+export const joinOrganizationRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await electorService.joinOrganizationRequest(req, next);
+    if (result) {
+      return res.status(statusCode.created()).json({
+        status: "success",
+        message: "Request successfully sent",
+        data: result,
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};
+
+export const leaveOrganization = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await electorService.leaveOrganization(req, next);
+    if (result) {
+      return res.status(statusCode.ok()).json({
+        status: "success",
+        message: "You left successfully",
+        data: result,
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};

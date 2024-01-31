@@ -6,6 +6,8 @@ import {
   getElector,
   getAllElectorsOrganization,
   getAllElectorsEvent,
+  joinOrganizationRequest,
+  leaveOrganization,
 } from "../../Controllers/Electors/elector.controller";
 import validate from "../../Middlewares/reqValidation.middleware";
 import authenticate from "../../Middlewares/verifyToken.middleware";
@@ -21,7 +23,15 @@ router.get("/getAllElectorsEvent", authenticate, getAllElectorsEvent);
 router.get("/getElector", authenticate, getAllElector);
 router.get("/:electorId", authenticate, getElector);
 
-// router.post("/addMemberRequest/:memberId", authenticate, addMemberRequest);
-// router.patch("/removeMember/:memberId", authenticate, removeMember);
+router.post(
+  "/joinOrganizationRequest/:organizationId",
+  authenticate,
+  joinOrganizationRequest
+);
+router.patch(
+  "/leaveOrganization/:organizationId",
+  authenticate,
+  leaveOrganization
+);
 
 export default router;
