@@ -151,3 +151,51 @@ export const leaveOrganization = async (
     );
   }
 };
+
+export const ignoreRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const updatedNotification = await electorService.ignoreRequest(req, next);
+    if (updatedNotification) {
+      return res.status(statusCode.ok()).json({
+        status: "success",
+        message: "Succesful",
+        data: updatedNotification,
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};
+
+export const acceptRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const updatedNotification = await electorService.acceptRequest(req, next);
+    if (updatedNotification) {
+      return res.status(statusCode.ok()).json({
+        status: "success",
+        message: "Succesful",
+        data: updatedNotification,
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};

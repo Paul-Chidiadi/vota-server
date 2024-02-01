@@ -158,4 +158,115 @@ export default class ElectorService {
       )
     );
   }
+
+  public async ignoreRequest(
+    req: any,
+    next: NextFunction
+  ): Promise<INotification | void> {
+    const user = req.user;
+    const { notificationId } = req.params;
+    //Get Details of this notification
+    const notification = await notificationRepository.findOneNotification(
+      notificationId
+    );
+    if (!notification) {
+      return next(
+        new AppError("Notification doesn't exist", statusCode.notFound())
+      );
+    }
+    const payload: INotification = {
+      senderId: notification.senderId,
+      isSettled: true,
+    };
+    const updatedNotification =
+      await notificationRepository.findNotificationByIdAndUpdate(
+        notificationId,
+        payload
+      );
+    if (updatedNotification) {
+      return updatedNotification;
+    }
+    return next(
+      new AppError("Failed to ignore request", statusCode.conflict())
+    );
+  }
+
+  public async acceptRequest(
+    req: any,
+    next: NextFunction
+  ): Promise<INotification | void> {
+    const user = req.user;
+    const { notificationId } = req.params;
+    //Get Details of this notification
+    const notification = await notificationRepository.findOneNotification(
+      notificationId
+    );
+    if (!notification) {
+      return next(
+        new AppError("Notification doesn't exist", statusCode.notFound())
+      );
+    }
+    if (notification.notificationType !== "Add Elector Request") {
+      return next(
+        new AppError("This Request is wrong", statusCode.badRequest())
+      );
+    }
+    if (notification.isSettled === true) {
+      return next(
+        new AppError("Notification is Settled", statusCode.badRequest())
+      );
+    }
+    // Add organization to elector's organizations list
+    const addOrganization = await userRepository.addOrganization(
+      user.id,
+      notification.senderId
+    );
+    if (!addOrganization) {
+      return next(
+        new AppError(
+          "Couldn't accept Organization",
+          statusCode.notImplemented()
+        )
+      );
+    }
+    // Add member to organization's members list
+    const addMember = await userRepository.addMember(
+      notification.senderId,
+      user.id
+    );
+    if (!addMember) {
+      // if Add member is not successful then remove organization back
+      const removeOrganization = await userRepository.removeOrganization(
+        user.id,
+        notification.senderId
+      );
+      return next(
+        new AppError("Couldn't accept Organization", statusCode.badRequest())
+      );
+    }
+    //If we have successfully added both organization and members into each others document then create notifications
+    const notificationPayload: INotification = {
+      senderId: user.id,
+      recipientId: notification.senderId,
+      notificationType: "Accept Request",
+      notificationMessage: "Accepted request to become your member",
+    };
+    const notificationData = await notificationRepository.createNotification(
+      notificationPayload
+    );
+    if (notificationData) {
+      const payload: INotification = {
+        senderId: notification.senderId,
+        isSettled: true,
+      };
+      const updatedNotification =
+        await notificationRepository.findNotificationByIdAndUpdate(
+          notificationId,
+          payload
+        );
+      if (updatedNotification) {
+        return updatedNotification;
+      }
+    }
+  }
 }

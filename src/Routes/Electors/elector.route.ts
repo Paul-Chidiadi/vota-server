@@ -8,6 +8,8 @@ import {
   getAllElectorsEvent,
   joinOrganizationRequest,
   leaveOrganization,
+  ignoreRequest,
+  acceptRequest,
 } from "../../Controllers/Electors/elector.controller";
 import validate from "../../Middlewares/reqValidation.middleware";
 import authenticate from "../../Middlewares/verifyToken.middleware";
@@ -33,5 +35,7 @@ router.patch(
   authenticate,
   leaveOrganization
 );
+router.patch("/ignoreRequest/:notificationId", authenticate, ignoreRequest);
+router.patch("/acceptRequest/:notificationId", authenticate, acceptRequest);
 
 export default router;

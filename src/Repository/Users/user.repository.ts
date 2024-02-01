@@ -83,6 +83,15 @@ export default class UserRepository {
     return user as IUser;
   }
 
+  async addMember(userId: string, memberId: string): Promise<IUser> {
+    const user: any = await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { members: memberId } },
+      { new: true }
+    );
+    return user as IUser;
+  }
+
   async removeOrganization(
     userId: string,
     organizationId: string
@@ -90,6 +99,18 @@ export default class UserRepository {
     const user: any = await User.findOneAndUpdate(
       { _id: userId },
       { $pull: { organizations: organizationId } },
+      { new: true }
+    );
+    return user as IUser;
+  }
+
+  async addOrganization(
+    userId: string,
+    organizationId: string
+  ): Promise<IUser> {
+    const user: any = await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { organizations: organizationId } },
       { new: true }
     );
     return user as IUser;
