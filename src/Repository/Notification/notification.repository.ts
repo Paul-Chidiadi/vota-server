@@ -10,10 +10,10 @@ export default class EventRepository {
   }
 
   async findOneNotification(id: string): Promise<INotification | null> {
-    const user: any = await Notification.findOne({ _id: id })
+    const notification: any = await Notification.findOne({ _id: id })
       .lean()
       .select("-__v");
-    return user as INotification;
+    return notification as INotification;
   }
 
   async findNotificationByIdAndUpdate(
