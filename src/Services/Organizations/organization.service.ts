@@ -39,9 +39,12 @@ export default class OrganizationService {
     const user = req.user;
     const { organizationId } = req.params;
     if (user) {
-      const organization = await userRepository.findUserById(organizationId);
+      let organization = await userRepository.findUserById(organizationId);
+      const arrayOfEvents = await eventsRepository.findAllOrganizationsEvent(
+        organizationId
+      );
       if (organization) {
-        return organization as IUser;
+        return { organization, arrayOfEvents } as any;
       }
       return next(new AppError("Oganization not found", statusCode.notFound()));
     }

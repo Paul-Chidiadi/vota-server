@@ -37,8 +37,25 @@ export default class ElectorService {
     const { electorId } = req.params;
     if (user) {
       const elector = await userRepository.findUserById(electorId);
+      //GET ELECTORS ORGANIZATIONS
+      const organizations: any = elector?.organizations;
+      let eventData: any = [];
+      if (organizations) {
+        //LOOP THROUGH ORGANIZATIONS ARRAY AND GET THEIR EVENTS EACH
+        for (let org = 0; org < organizations.length; org++) {
+          const organizationId = organizations[org];
+          const arrayOfEvents =
+            await eventsRepository.findAllOrganizationsEvent(organizationId);
+          if (!arrayOfEvents) {
+            return next(
+              new AppError("Failed to get events", statusCode.conflict())
+            );
+          }
+          eventData.push(...arrayOfEvents);
+        }
+      }
       if (elector) {
-        return elector as IUser;
+        return { elector, eventData } as any;
       }
       return next(new AppError("Elector not found", statusCode.notFound()));
     }

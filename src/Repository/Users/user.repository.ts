@@ -19,9 +19,10 @@ export default class UserRepository {
   }
 
   async findUserById(userId: string): Promise<IUser | null> {
-    const user: any = await User.findById(userId).select(
-      "-password -isEmailVerified"
-    );
+    const user: any = await User.findById(userId)
+      .select("-password -isEmailVerified")
+      .populate("members")
+      .populate("organizations");
     return user as IUser;
   }
 
