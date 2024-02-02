@@ -286,4 +286,104 @@ export default class ElectorService {
       }
     }
   }
+
+  public async vote(req: any, next: NextFunction): Promise<IEvent | void> {
+    const user = req.user;
+    const { eventId } = req.params;
+    const { positionId, questionId } = req.body;
+    const eventData: any = await eventsRepository.findOneEvent(eventId);
+    if (!eventData) {
+      return next(new AppError("Event doesn't exist", statusCode.notFound()));
+    }
+    //IF THE EVENT TYPE IS A POLL
+    if (
+      eventData.eventType === "Poll" &&
+      eventData.pollQuestions &&
+      eventData.pollQuestions.length > 0
+    ) {
+      //GET PARTICULAR QUESTION ID IN THE POLLQUESTIONS ARRAY
+      const questionBeingVotedFor = eventData.pollQuestions.filter(
+        (item: any) => {
+          return item._id.toString() === questionId;
+        }
+      );
+      const questionTitle = questionBeingVotedFor[0].question;
+      const numberOfVotes = questionBeingVotedFor[0].voteCount;
+      const votersArray = questionBeingVotedFor[0].voters;
+      const includesUserInformation = eventData.pollQuestions.some((obj: any) =>
+        obj.voters.some((voter: any) => voter._id.toString() === user.id)
+      );
+      if (includesUserInformation) {
+        return next(
+          new AppError("Vote already casted", statusCode.badRequest())
+        );
+      }
+      const payload: any = {
+        question: questionTitle,
+        voters: [...votersArray, user.id],
+        voteCount: Number(numberOfVotes) + 1,
+      };
+      const updatedPollQuestion = await eventsRepository.updatePollQuestion(
+        eventId,
+        questionId,
+        payload
+      );
+      if (updatedPollQuestion) {
+        //ENABLE FIREBASE PUSH NOTIFICATIONS
+        return updatedPollQuestion as any;
+      }
+    }
+
+    //IF THE EVENT TYPE IS A ELECTION
+    if (
+      eventData.eventType === "Election" &&
+      eventData.candidates &&
+      eventData.candidates.length > 0
+    ) {
+      //GET PARTICULAR POSITION ID IN THE CANDIDATE ARRAY
+      const candidateBeingVotedFor = eventData.candidates.filter(
+        (item: any) => {
+          return item._id.toString() === positionId;
+        }
+      );
+      const runfor = candidateBeingVotedFor[0].runfor;
+      const candidateId = candidateBeingVotedFor[0].candidateId;
+      const numberOfVotes = candidateBeingVotedFor[0].voteCount;
+      const votersArray = candidateBeingVotedFor[0].voters;
+
+      //CHECK IF USER HAS VOTED ALREADY
+      const hasVoted = eventData.candidates
+        .filter((obj: any) => obj.runfor === runfor)
+        .some((obj: any) =>
+          obj.voters.some((voter: any) => voter._id.toString() === user.id)
+        );
+      if (hasVoted) {
+        return next(
+          new AppError(
+            `Vote already casted for ${runfor}`,
+            statusCode.badRequest()
+          )
+        );
+      }
+      const payload: any = {
+        runfor: runfor,
+        candidateId: candidateId,
+        voters: [...votersArray, user.id],
+        voteCount: Number(numberOfVotes) + 1,
+      };
+      const updatedCandidate = await eventsRepository.updateCandidate(
+        eventId,
+        positionId,
+        payload
+      );
+      if (updatedCandidate) {
+        //ENABLE FIREBASE PUSH NOTIFICATIONS
+        return updatedCandidate as any;
+      }
+    }
+
+    return next(
+      new AppError(`Couldn't cast vote`, statusCode.notImplemented())
+    );
+  }
 }

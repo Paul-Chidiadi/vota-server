@@ -54,15 +54,15 @@ const eventSchema = new mongoose.Schema({
     {
       runfor: String,
       candidateId: { type: Schema.Types.ObjectId, ref: "User" },
-      voteCount: Number,
-      voters: [],
+      voteCount: { type: Number, default: 0 },
+      voters: [{ type: Schema.Types.ObjectId, ref: "User" }],
     },
   ],
   pollQuestions: [
     {
       question: String,
-      voteCount: Number,
-      voters: [],
+      voteCount: { type: Number, default: 0 },
+      voters: [{ type: Schema.Types.ObjectId, ref: "User" }],
     },
   ],
   isPublic: {

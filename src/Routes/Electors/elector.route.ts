@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createEventValidationRules } from "../../Middlewares/Electors/elector.middleware";
+import { voteEventValidationRules } from "../../Middlewares/Electors/elector.middleware";
 
 import {
   getAllElector,
@@ -10,6 +10,7 @@ import {
   leaveOrganization,
   ignoreRequest,
   acceptRequest,
+  vote,
 } from "../../Controllers/Electors/elector.controller";
 import validate from "../../Middlewares/reqValidation.middleware";
 import authenticate from "../../Middlewares/verifyToken.middleware";
@@ -37,5 +38,12 @@ router.patch(
 );
 router.patch("/ignoreRequest/:notificationId", authenticate, ignoreRequest);
 router.patch("/acceptRequest/:notificationId", authenticate, acceptRequest);
+router.patch(
+  "/vote/:eventId",
+  voteEventValidationRules(),
+  validate,
+  authenticate,
+  vote
+);
 
 export default router;
