@@ -138,7 +138,7 @@ export const endEvent = async (
     if (event) {
       return res.status(statusCode.created()).json({
         status: "success",
-        message: "Event cancelled successfully",
+        message: "Event Ended successfully",
         data: event,
       });
     }

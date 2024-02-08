@@ -8,6 +8,8 @@ import Utilities, { statusCode } from "../../Utilities/utils";
 import { MalierService } from "../Email/mailer";
 import { IEvent } from "../../Models/Events/events.model";
 import { INotification } from "../../Models/Notification/notification.model";
+import { ref, set, update } from "firebase/database";
+import firebaseDB from "../../firebase-config";
 
 const notificationRepository = new NotificationRepository();
 const userRepository = new UserRepository();
@@ -113,7 +115,10 @@ export default class ElectorService {
     const { organizationId } = req.params;
     const elector = await userRepository.findUserById(user.id);
     const organizations = elector?.organizations;
-    if (organizations?.includes(organizationId)) {
+    if (
+      organizations?.length !== 0 &&
+      organizations?.some((item: any) => item.id === organizationId)
+    ) {
       return next(new AppError("Joined Already", statusCode.conflict()));
     }
     const payload: INotification = {
@@ -126,6 +131,19 @@ export default class ElectorService {
       payload
     );
     if (notificationData) {
+      // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
+      const notificationsRef = ref(
+        firebaseDB,
+        `notifications/${notificationData.id?.toString()}`
+      );
+      const result = await set(notificationsRef, {
+        id: notificationData.id,
+        senderId: String(notificationData.senderId),
+        recipientId: String(notificationData.recipientId),
+        notificationType: notificationData.notificationType,
+        notificationMessage: notificationData.notificationMessage,
+        isSettled: notificationData.isSettled,
+      });
       return notificationData as INotification;
     }
     return next(new AppError("Failed to send request", statusCode.conflict()));
@@ -139,7 +157,10 @@ export default class ElectorService {
     const { organizationId } = req.params;
     const elector = await userRepository.findUserById(user.id);
     const organizations = elector?.organizations;
-    if (organizations?.includes(organizationId)) {
+    if (
+      organizations?.length !== 0 &&
+      organizations?.some((item: any) => item.id === organizationId)
+    ) {
       // Remove organization from elector's organizations list
       const deleteOrganization = await userRepository.removeOrganization(
         user.id,
@@ -161,6 +182,19 @@ export default class ElectorService {
         const notificationData =
           await notificationRepository.createNotification(notificationPayload);
         if (notificationData) {
+          // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
+          const notificationsRef = ref(
+            firebaseDB,
+            `notifications/${notificationData.id?.toString()}`
+          );
+          const result = await set(notificationsRef, {
+            id: notificationData.id,
+            senderId: String(notificationData.senderId),
+            recipientId: String(notificationData.recipientId),
+            notificationType: notificationData.notificationType,
+            notificationMessage: notificationData.notificationMessage,
+            isSettled: notificationData.isSettled,
+          });
           return deletedMember as IUser;
         }
       }
@@ -201,6 +235,18 @@ export default class ElectorService {
         payload
       );
     if (updatedNotification) {
+      // FIREBASE REALTIME UPDATE DATABASE NOTIFICATIONS
+      const updateNotificationsRef: any = ref(
+        firebaseDB,
+        `notifications/${notificationId?.toString()}`
+      );
+      try {
+        // Use the update method to modify specific properties
+        await update(updateNotificationsRef, { isSettled: true });
+      } catch (error) {
+        console.error("Error updating notification:", error);
+        throw error;
+      }
       return updatedNotification;
     }
     return next(
@@ -271,7 +317,21 @@ export default class ElectorService {
     const notificationData = await notificationRepository.createNotification(
       notificationPayload
     );
+
     if (notificationData) {
+      // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
+      const notificationsRef = ref(
+        firebaseDB,
+        `notifications/${notificationData.id?.toString()}`
+      );
+      const result = await set(notificationsRef, {
+        id: notificationData.id,
+        senderId: String(notificationData.senderId),
+        recipientId: String(notificationData.recipientId),
+        notificationType: notificationData.notificationType,
+        notificationMessage: notificationData.notificationMessage,
+        isSettled: notificationData.isSettled,
+      });
       const payload: INotification = {
         senderId: notification.senderId,
         isSettled: true,
@@ -282,6 +342,18 @@ export default class ElectorService {
           payload
         );
       if (updatedNotification) {
+        // FIREBASE REALTIME UPDATE DATABASE NOTIFICATIONS
+        const updateNotificationsRef: any = ref(
+          firebaseDB,
+          `notifications/${notificationId?.toString()}`
+        );
+        try {
+          // Use the update method to modify specific properties
+          await update(updateNotificationsRef, { isSettled: true });
+        } catch (error) {
+          console.error("Error updating notification:", error);
+          throw error;
+        }
         return updatedNotification;
       }
     }
