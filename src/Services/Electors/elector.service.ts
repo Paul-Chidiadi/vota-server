@@ -8,8 +8,6 @@ import Utilities, { statusCode } from "../../Utilities/utils";
 import { MalierService } from "../Email/mailer";
 import { IEvent } from "../../Models/Events/events.model";
 import { INotification } from "../../Models/Notification/notification.model";
-import { ref, set, update } from "firebase/database";
-import firebaseDB from "../../firebase-config";
 
 const notificationRepository = new NotificationRepository();
 const userRepository = new UserRepository();
@@ -132,18 +130,9 @@ export default class ElectorService {
     );
     if (notificationData) {
       // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-      const notificationsRef = ref(
-        firebaseDB,
-        `notifications/${notificationData.id?.toString()}`
+      const result = await notificationRepository.firebaseInsertNotification(
+        notificationData
       );
-      const result = await set(notificationsRef, {
-        id: notificationData.id,
-        senderId: String(notificationData.senderId),
-        recipientId: String(notificationData.recipientId),
-        notificationType: notificationData.notificationType,
-        notificationMessage: notificationData.notificationMessage,
-        isSettled: notificationData.isSettled,
-      });
       return notificationData as INotification;
     }
     return next(new AppError("Failed to send request", statusCode.conflict()));
@@ -184,18 +173,10 @@ export default class ElectorService {
           await notificationRepository.createNotification(notificationPayload);
         if (notificationData) {
           // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-          const notificationsRef = ref(
-            firebaseDB,
-            `notifications/${notificationData.id?.toString()}`
-          );
-          const result = await set(notificationsRef, {
-            id: notificationData.id,
-            senderId: String(notificationData.senderId),
-            recipientId: String(notificationData.recipientId),
-            notificationType: notificationData.notificationType,
-            notificationMessage: notificationData.notificationMessage,
-            isSettled: notificationData.isSettled,
-          });
+          const result =
+            await notificationRepository.firebaseInsertNotification(
+              notificationData
+            );
           return deletedMember as IUser;
         }
       }
@@ -237,17 +218,9 @@ export default class ElectorService {
       );
     if (updatedNotification) {
       // FIREBASE REALTIME UPDATE DATABASE NOTIFICATIONS
-      const updateNotificationsRef: any = ref(
-        firebaseDB,
-        `notifications/${notificationId?.toString()}`
+      const result = await notificationRepository.firebaseUpdateNotification(
+        notificationId
       );
-      try {
-        // Use the update method to modify specific properties
-        await update(updateNotificationsRef, { isSettled: true });
-      } catch (error) {
-        console.error("Error updating notification:", error);
-        throw error;
-      }
       return updatedNotification;
     }
     return next(
@@ -321,18 +294,9 @@ export default class ElectorService {
 
     if (notificationData) {
       // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-      const notificationsRef = ref(
-        firebaseDB,
-        `notifications/${notificationData.id?.toString()}`
+      const result = await notificationRepository.firebaseInsertNotification(
+        notificationData
       );
-      const result = await set(notificationsRef, {
-        id: notificationData.id,
-        senderId: String(notificationData.senderId),
-        recipientId: String(notificationData.recipientId),
-        notificationType: notificationData.notificationType,
-        notificationMessage: notificationData.notificationMessage,
-        isSettled: notificationData.isSettled,
-      });
       const payload: INotification = {
         senderId: notification.senderId,
         isSettled: true,
@@ -344,17 +308,9 @@ export default class ElectorService {
         );
       if (updatedNotification) {
         // FIREBASE REALTIME UPDATE DATABASE NOTIFICATIONS
-        const updateNotificationsRef: any = ref(
-          firebaseDB,
-          `notifications/${notificationId?.toString()}`
+        const result = await notificationRepository.firebaseUpdateNotification(
+          notificationId
         );
-        try {
-          // Use the update method to modify specific properties
-          await update(updateNotificationsRef, { isSettled: true });
-        } catch (error) {
-          console.error("Error updating notification:", error);
-          throw error;
-        }
         return updatedNotification;
       }
     }
