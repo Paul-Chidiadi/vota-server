@@ -158,7 +158,8 @@ export default class ElectorService {
     const elector = await userRepository.findUserById(user.id);
     const organizations = elector?.organizations;
     if (
-      organizations?.length !== 0 &&
+      organizations &&
+      organizations?.length > 0 &&
       organizations?.some((item: any) => item.id === organizationId)
     ) {
       // Remove organization from elector's organizations list
