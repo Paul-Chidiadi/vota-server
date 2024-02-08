@@ -394,4 +394,29 @@ export default class OrganizationService {
       }
     }
   }
+
+  public async uploadLogoImage(
+    req: any,
+    next: NextFunction
+  ): Promise<IUser | void> {
+    const user = req.user;
+    const file = req.file;
+    if (!file) {
+      return next(new AppError(`Image not found`, statusCode.notFound()));
+    }
+    const fileDestination = `images/${file.filename}`;
+    const payload: any = {
+      logo: fileDestination,
+    };
+    const updatedUser = await userRepository.findUserByIdAndUpdate(
+      user.id,
+      payload
+    );
+    if (updatedUser) {
+      return updatedUser;
+    }
+    return next(
+      new AppError(`Image Upload failed`, statusCode.notImplemented())
+    );
+  }
 }

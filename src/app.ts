@@ -7,6 +7,7 @@ import mongoSanitize from "express-mongo-sanitize";
 import hpp from "hpp";
 import express, { Application, Request, Response, NextFunction } from "express";
 import firebaseDB from "./firebase-config";
+import path from "path";
 
 import AppError from "./Utilities/Errors/appError";
 import { errorHandler } from "./Middlewares/Errors/errorMiddleware";
@@ -50,6 +51,8 @@ app.use(
 // body parser, reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: false }));
+//DISPLAY STATIC FILES FROM THIS FOLDER
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 // Data sanitization against noSQL query injection
 app.use(mongoSanitize());

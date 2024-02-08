@@ -304,3 +304,27 @@ export const acceptRequest = async (
     );
   }
 };
+
+export const uploadLogoImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await organizationService.uploadLogoImage(req, next);
+    if (user) {
+      return res.status(statusCode.ok()).json({
+        status: "success",
+        message: "Succesful",
+        data: user,
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};

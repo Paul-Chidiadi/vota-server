@@ -1,15 +1,15 @@
 import bcrypt from "bcrypt";
 import "dotenv/config";
 import { convert } from "html-to-text";
-import CryptoJS from "crypto-js";
-// import path from 'path';
-// import { v2 as cloudinary } from 'cloudinary';
-// import { customAlphabet } from 'nanoid';
-// import fs from 'fs';
-// import multer from 'multer';
+import path from "path";
+import fs from "fs";
+import multer from "multer";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import mongoose, { ObjectId } from "mongoose";
 import UserRepository from "../Repository/Users/user.repository";
+// import CryptoJS from "crypto-js";
+// import { v2 as cloudinary } from 'cloudinary';
+// import { customAlphabet } from 'nanoid';
 
 const userRepository = new UserRepository();
 
@@ -139,6 +139,42 @@ export default class Utilities {
     return datetime;
   }
 }
+
+// create folder to store images/files
+export const fileStorageEngine = multer.diskStorage({
+  destination: (req: any, file: any, cb: any) => {
+    const dir = `${path.normalize(path.join(__dirname, "../images"))}`;
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+    }
+    cb(null, dir);
+  },
+
+  filename: (req: any, file: any, cb: any) => {
+    cb(null, `${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+
+// check file/images
+export const fileFilter = (req: any, file: any, cb: any) => {
+  if (
+    file.mimetype === "image/jpeg" ||
+    file.mimetype === "image/png" ||
+    file.mimetype === "image/jpg"
+  ) {
+    cb(null, true);
+  } else if (file.mimetype === "application/pdf") {
+    cb(null, true);
+  } else {
+    cb({ message: `Unsupported file format ${file.mimetype}` });
+  }
+};
+
+export const upload = multer({
+  storage: fileStorageEngine,
+  limits: { fileSize: 5242880 },
+  fileFilter,
+});
 
 export const statusCode = {
   ok() {

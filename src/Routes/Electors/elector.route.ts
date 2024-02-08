@@ -11,9 +11,11 @@ import {
   ignoreRequest,
   acceptRequest,
   vote,
+  uploadProfileImage,
 } from "../../Controllers/Electors/elector.controller";
 import validate from "../../Middlewares/reqValidation.middleware";
 import authenticate from "../../Middlewares/verifyToken.middleware";
+import { upload } from "../../Utilities/utils";
 
 const router = Router();
 
@@ -44,6 +46,14 @@ router.patch(
   validate,
   authenticate,
   vote
+);
+
+router.patch(
+  "/uploadProfileImage",
+  upload.single("image"),
+  validate,
+  authenticate,
+  uploadProfileImage
 );
 
 export default router;

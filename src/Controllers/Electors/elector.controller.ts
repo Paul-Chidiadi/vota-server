@@ -219,3 +219,27 @@ export const vote = async (req: Request, res: Response, next: NextFunction) => {
     );
   }
 };
+
+export const uploadProfileImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const user = await electorService.uploadProfileImage(req, next);
+    if (user) {
+      return res.status(statusCode.ok()).json({
+        status: "success",
+        message: "Succesful",
+        data: user,
+      });
+    }
+  } catch (err) {
+    return next(
+      new AppError(
+        `something went wrong ${err}`,
+        statusCode.internalServerError()
+      )
+    );
+  }
+};

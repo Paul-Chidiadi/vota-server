@@ -17,9 +17,11 @@ import {
   getOrganization,
   ignoreRequest,
   acceptRequest,
+  uploadLogoImage,
 } from "../../Controllers/Organizations/organization.controller";
 import validate from "../../Middlewares/reqValidation.middleware";
 import authenticate from "../../Middlewares/verifyToken.middleware";
+import { upload } from "../../Utilities/utils";
 
 const router = Router();
 
@@ -51,4 +53,12 @@ router.post("/addMemberRequest/:memberId", authenticate, addMemberRequest);
 router.patch("/removeMember/:memberId", authenticate, removeMember);
 router.patch("/ignoreRequest/:notificationId", authenticate, ignoreRequest);
 router.patch("/acceptRequest/:notificationId", authenticate, acceptRequest);
+router.patch(
+  "/uploadLogoImage",
+  upload.single("image"),
+  validate,
+  authenticate,
+  uploadLogoImage
+);
+
 export default router;

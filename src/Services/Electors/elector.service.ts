@@ -415,4 +415,29 @@ export default class ElectorService {
       new AppError(`Couldn't cast vote`, statusCode.notImplemented())
     );
   }
+
+  public async uploadProfileImage(
+    req: any,
+    next: NextFunction
+  ): Promise<IUser | void> {
+    const user = req.user;
+    const file = req.file;
+    if (!file) {
+      return next(new AppError(`Image not found`, statusCode.notFound()));
+    }
+    const fileDestination = `images/${file.filename}`;
+    const payload: any = {
+      displayPicture: fileDestination,
+    };
+    const updatedUser = await userRepository.findUserByIdAndUpdate(
+      user.id,
+      payload
+    );
+    if (updatedUser) {
+      return updatedUser;
+    }
+    return next(
+      new AppError(`Image Upload failed`, statusCode.notImplemented())
+    );
+  }
 }
