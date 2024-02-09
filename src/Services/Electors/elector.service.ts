@@ -352,13 +352,14 @@ export default class ElectorService {
         voters: [...votersArray, user.id],
         voteCount: Number(numberOfVotes) + 1,
       };
-      const updatedPollQuestion = await eventsRepository.updatePollQuestion(
-        eventId,
-        questionId,
-        payload
-      );
+      const updatedPollQuestion: any =
+        await eventsRepository.updatePollQuestion(eventId, questionId, payload);
       if (updatedPollQuestion) {
-        //ENABLE FIREBASE PUSH NOTIFICATIONS
+        // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
+        const result = await eventsRepository.firebaseUpdateEvent(
+          eventId,
+          updatedPollQuestion
+        );
         return updatedPollQuestion as any;
       }
     }
@@ -400,13 +401,17 @@ export default class ElectorService {
         voters: [...votersArray, user.id],
         voteCount: Number(numberOfVotes) + 1,
       };
-      const updatedCandidate = await eventsRepository.updateCandidate(
+      const updatedCandidate: any = await eventsRepository.updateCandidate(
         eventId,
         positionId,
         payload
       );
       if (updatedCandidate) {
-        //ENABLE FIREBASE PUSH NOTIFICATIONS
+        // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
+        const result = await eventsRepository.firebaseUpdateEvent(
+          eventId,
+          updatedCandidate
+        );
         return updatedCandidate as any;
       }
     }

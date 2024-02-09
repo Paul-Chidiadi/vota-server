@@ -62,6 +62,8 @@ export default class OrganizationService {
     };
     const eventData = await eventsRepository.createEvent(payload);
     if (eventData) {
+      // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
+      const result = await eventsRepository.firebaseInsertEvent(eventData);
       //if event is created then insert into notification schema and then send a notification
       const notificationPayload: INotification = {
         senderId: user.id,
@@ -94,6 +96,11 @@ export default class OrganizationService {
     );
     //if event is edited successfully then insert into notification schema and then send notification
     if (eventData) {
+      // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
+      const result = await eventsRepository.firebaseUpdateEvent(
+        eventId,
+        eventData
+      );
       const notificationPayload: INotification = {
         senderId: user.id,
         notificationType: "Edit Event",
@@ -122,6 +129,8 @@ export default class OrganizationService {
     const eventData = await eventsRepository.deleteEvent(eventId);
     //if event is cancelled successfully then insert into notification schema and then send notification
     if (eventData) {
+      // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
+      const result = await eventsRepository.firebaseDeleteEvent(eventId);
       const notificationPayload: INotification = {
         senderId: user.id,
         notificationType: "Cancel Event",
@@ -153,6 +162,11 @@ export default class OrganizationService {
     );
     //if event is ended successfully then insert into notification schema and then send notification
     if (eventData) {
+      // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
+      const result = await eventsRepository.firebaseUpdateEvent(
+        eventId,
+        eventData
+      );
       const notificationPayload: INotification = {
         senderId: user.id,
         notificationType: "End Event",

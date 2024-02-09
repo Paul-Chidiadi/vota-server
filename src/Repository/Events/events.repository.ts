@@ -1,4 +1,6 @@
 import { Event, IEvent } from "../../Models/Events/events.model";
+import { ref, set, update, remove } from "firebase/database";
+import firebaseDB from "../../firebase-config";
 
 export default class EventRepository {
   async createEvent(payload: IEvent): Promise<IEvent> {
@@ -26,9 +28,7 @@ export default class EventRepository {
   ): Promise<IEvent | null> {
     const event: any = await Event.findByIdAndUpdate({ _id: id }, payload, {
       new: true,
-    })
-      .select("*")
-      .exec();
+    }).exec();
     return event as IEvent;
   }
 
@@ -82,5 +82,63 @@ export default class EventRepository {
       { new: true }
     );
     return event as any;
+  }
+
+  // FIREBASE REPOSITORY SECTION
+  async firebaseInsertEvent(eventData: IEvent): Promise<IEvent | void> {
+    const eventsRef = ref(firebaseDB, `events/${eventData.id?.toString()}`);
+    const result = await set(eventsRef, {
+      id: eventData.id,
+      owner: eventData.owner?.toString(),
+      eventName: String(eventData.eventName),
+      eventType: String(eventData.eventType),
+      schedule: eventData.schedule,
+      status: eventData.status,
+      positions: eventData.positions,
+      candidates: JSON.stringify(eventData.candidates),
+      pollQuestions: JSON.stringify(eventData.pollQuestions),
+      isPublic: eventData.isPublic,
+    });
+    return result;
+  }
+
+  async firebaseUpdateEvent(
+    eventId: string,
+    eventData: IEvent
+  ): Promise<IEvent | void> {
+    const updateEventsRef: any = ref(
+      firebaseDB,
+      `events/${eventId?.toString()}`
+    );
+    try {
+      // Use the update method to modify specific properties
+      const result = await update(updateEventsRef, {
+        id: eventData.id,
+        owner: eventData.owner?.toString(),
+        eventName: String(eventData.eventName),
+        eventType: String(eventData.eventType),
+        schedule: eventData.schedule,
+        status: eventData.status,
+        positions: eventData.positions,
+        candidates: JSON.stringify(eventData.candidates),
+        pollQuestions: JSON.stringify(eventData.pollQuestions),
+        isPublic: eventData.isPublic,
+      });
+      return result;
+    } catch (error) {
+      console.error("Error updating event:", error);
+      throw error;
+    }
+  }
+
+  async firebaseDeleteEvent(eventId: string): Promise<IEvent | void> {
+    const eventsRef = ref(firebaseDB, `events/${eventId?.toString()}`);
+    try {
+      // Use the remove method to delete the specific event
+      await remove(eventsRef);
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      throw error;
+    }
   }
 }
