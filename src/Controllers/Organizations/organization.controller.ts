@@ -17,7 +17,7 @@ export const getAllOrganization = async (
     );
     if (organization) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Successful",
         data: organization,
       });
@@ -41,7 +41,7 @@ export const getOrganization = async (
     const organization = await organizationService.getOrganization(req, next);
     if (organization) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Successful",
         data: organization,
       });
@@ -65,7 +65,7 @@ export const createEvent = async (
     const event = await organizationService.createEvent(req, next);
     if (event) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Event successfully Created",
         data: event,
       });
@@ -89,7 +89,7 @@ export const editEvent = async (
     const event = await organizationService.editEvent(req, next);
     if (event) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Event updated successfully",
         data: event,
       });
@@ -113,7 +113,7 @@ export const cancelEvent = async (
     const event = await organizationService.cancelEvent(req, next);
     if (event) {
       return res.status(statusCode.ok()).json({
-        status: "success",
+        success: true,
         message: "Event cancelled successfully",
         data: event,
       });
@@ -137,7 +137,7 @@ export const endEvent = async (
     const event = await organizationService.endEvent(req, next);
     if (event) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Event Ended successfully",
         data: event,
       });
@@ -161,7 +161,7 @@ export const getAllOrganizationsEvent = async (
     const event = await organizationService.getAllOrganizationsEvent(req, next);
     if (event) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Successful",
         data: event,
       });
@@ -188,7 +188,7 @@ export const getAllOrganizationsMembers = async (
     );
     if (members) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Successful",
         data: members,
       });
@@ -212,7 +212,7 @@ export const addMemberRequest = async (
     const member = await organizationService.addMemberRequest(req, next);
     if (member) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Request successfully sent",
         data: member,
       });
@@ -236,7 +236,7 @@ export const removeMember = async (
     const member = await organizationService.removeMember(req, next);
     if (member) {
       return res.status(statusCode.ok()).json({
-        status: "success",
+        success: true,
         message: "Member removed successfully",
         data: member,
       });
@@ -263,7 +263,7 @@ export const ignoreRequest = async (
     );
     if (updatedNotification) {
       return res.status(statusCode.ok()).json({
-        status: "success",
+        success: true,
         message: "Succesful",
         data: updatedNotification,
       });
@@ -290,7 +290,7 @@ export const acceptRequest = async (
     );
     if (updatedNotification) {
       return res.status(statusCode.ok()).json({
-        status: "success",
+        success: true,
         message: "Succesful",
         data: updatedNotification,
       });
@@ -314,7 +314,7 @@ export const uploadLogoImage = async (
     const user = await organizationService.uploadLogoImage(req, next);
     if (user) {
       return res.status(statusCode.ok()).json({
-        status: "success",
+        success: true,
         message: "Succesful",
         data: user,
       });

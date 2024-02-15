@@ -14,10 +14,9 @@ export const signUp = async (
     const user = await authService.signUp(req, next);
     if (user) {
       return res.status(statusCode.created()).json({
-        status: "success",
-        message:
-          "Account successfully created, Check your mail for activation code",
-        user,
+        success: true,
+        message: "Signup successful, Check email for activation code",
+        data: user,
       });
     }
   } catch (err) {
@@ -40,7 +39,8 @@ export const activateUserAccount = async (
     if (result) {
       return res.status(statusCode.accepted()).json({
         success: true,
-        message: "Email verification successful, please login to continue",
+        message: "Email verification successful, login to continue",
+        data: result,
       });
     }
   } catch (err) {
@@ -64,6 +64,7 @@ export const resendOTP = async (
       return res.status(statusCode.ok()).json({
         success: true,
         message: "OTP sent successful, please check your email",
+        data: result,
       });
     }
   } catch (err) {
@@ -83,7 +84,13 @@ export const login = async (
 ) => {
   try {
     const result = await authService.login(req, res, next);
-    return result;
+    if (result) {
+      return res.status(statusCode.accepted()).json({
+        success: true,
+        message: "Login Successful",
+        data: result,
+      });
+    }
   } catch (err) {
     return next(
       new AppError(
@@ -101,7 +108,13 @@ export const refreshToken = async (
 ) => {
   try {
     const verifiedToken = await authService.refreshToken(req, res, next);
-    return verifiedToken;
+    if (verifiedToken) {
+      return res.status(statusCode.accepted()).json({
+        success: true,
+        message: "Token Refreshed",
+        data: verifiedToken,
+      });
+    }
   } catch (error) {
     return next(
       new AppError(
@@ -122,8 +135,8 @@ export const forgotPassword = async (
     if (user) {
       return res.status(statusCode.accepted()).json({
         success: true,
-        message:
-          "A passowrd reset code has been sent to your email Successfully.",
+        message: "password reset code sent to your email.",
+        data: user,
       });
     }
   } catch (error) {
@@ -146,7 +159,8 @@ export const resetPassword = async (
     if (result) {
       return res.status(statusCode.ok()).json({
         success: true,
-        message: "Password reset successfully",
+        message: "Password reset successful",
+        data: result,
       });
     }
   } catch (error) {

@@ -14,9 +14,9 @@ export const editProfile = async (
     const user = await globalService.editProfile(req, next);
     if (user) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Profile successfully Updated",
-        user,
+        data: user,
       });
     }
   } catch (err) {
@@ -38,9 +38,9 @@ export const editPassword = async (
     const user = await globalService.editPassword(req, next);
     if (user) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Password successfully Updated",
-        user,
+        data: user,
       });
     }
   } catch (err) {
@@ -62,9 +62,9 @@ export const editEmail = async (
     const user = await globalService.editEmail(req, next);
     if (user) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Email successfully Updated",
-        user,
+        data: user,
       });
     }
   } catch (err) {
@@ -86,9 +86,9 @@ export const getEvent = async (
     const event = await globalService.getEvent(req, next);
     if (event) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Successful",
-        event,
+        data: event,
       });
     }
   } catch (err) {

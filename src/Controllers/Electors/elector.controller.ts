@@ -14,7 +14,7 @@ export const getAllElector = async (
     const elector = await electorService.getAllElector(req, next);
     if (elector) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Successful",
         data: elector,
       });
@@ -38,7 +38,7 @@ export const getElector = async (
     const elector = await electorService.getElector(req, next);
     if (elector) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Successful",
         data: elector,
       });
@@ -65,7 +65,7 @@ export const getAllElectorsOrganization = async (
     );
     if (organizations) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Successful",
         data: organizations,
       });
@@ -89,7 +89,7 @@ export const getAllElectorsEvent = async (
     const event = await electorService.getAllElectorsEvent(req, next);
     if (event) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Successful",
         data: event,
       });
@@ -113,7 +113,7 @@ export const joinOrganizationRequest = async (
     const result = await electorService.joinOrganizationRequest(req, next);
     if (result) {
       return res.status(statusCode.created()).json({
-        status: "success",
+        success: true,
         message: "Request successfully sent",
         data: result,
       });
@@ -137,7 +137,7 @@ export const leaveOrganization = async (
     const result = await electorService.leaveOrganization(req, next);
     if (result) {
       return res.status(statusCode.ok()).json({
-        status: "success",
+        success: true,
         message: "You left successfully",
         data: result,
       });
@@ -161,7 +161,7 @@ export const ignoreRequest = async (
     const updatedNotification = await electorService.ignoreRequest(req, next);
     if (updatedNotification) {
       return res.status(statusCode.ok()).json({
-        status: "success",
+        success: true,
         message: "Succesful",
         data: updatedNotification,
       });
@@ -185,7 +185,7 @@ export const acceptRequest = async (
     const updatedNotification = await electorService.acceptRequest(req, next);
     if (updatedNotification) {
       return res.status(statusCode.ok()).json({
-        status: "success",
+        success: true,
         message: "Succesful",
         data: updatedNotification,
       });
@@ -205,7 +205,7 @@ export const vote = async (req: Request, res: Response, next: NextFunction) => {
     const event = await electorService.vote(req, next);
     if (event) {
       return res.status(statusCode.ok()).json({
-        status: "success",
+        success: true,
         message: "Succesful",
         data: event,
       });
@@ -229,7 +229,7 @@ export const uploadProfileImage = async (
     const user = await electorService.uploadProfileImage(req, next);
     if (user) {
       return res.status(statusCode.ok()).json({
-        status: "success",
+        success: true,
         message: "Succesful",
         data: user,
       });
