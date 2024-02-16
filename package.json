@@ -8,7 +8,7 @@
     "start": "node dist/app.js",
     "postinstall": "tsc",
     "start:dev": "npm run tsc && nodemon --files ./src/app.ts",
-    "start:prod": "npm run tsc && NODE_ENV=production nodemon ./src/app.js",
+    "start:prod": "npm run tsc && NODE_ENV=production nodemon ./dist/app.js",
     "tsc": "tsc"
   },
   "keywords": [],
