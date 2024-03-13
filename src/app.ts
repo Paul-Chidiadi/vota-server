@@ -42,7 +42,7 @@ app.options("*", cors());
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["http://localhost:3000", "https://vota-sigma.vercel.app"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
   })
 );
