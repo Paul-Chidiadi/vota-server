@@ -16,9 +16,11 @@ export default class EventRepository {
             ? populatedNotification?.senderId.companyName
             : populatedNotification?.senderId.fullName,
         image:
-          populatedNotification && populatedNotification?.senderId.logo
+          populatedNotification.senderId.logo !== undefined
             ? populatedNotification?.senderId.logo
-            : populatedNotification?.senderId.displayPicture,
+              ? populatedNotification?.senderId.logo
+              : populatedNotification?.senderId.displayPicture
+            : "nil",
         email: populatedNotification && populatedNotification?.senderId.email,
       };
     }
