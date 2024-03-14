@@ -16,10 +16,7 @@ const util = new Utilities();
 const mail = new MalierService();
 
 export default class OrganizationService {
-  public async getAllOrganization(
-    req: any,
-    next: NextFunction
-  ): Promise<IUser[] | void> {
+  public async getAllOrganization(req: any, next: NextFunction): Promise<IUser[] | void> {
     const user = req.user;
     if (user) {
       const role = "Organization";
@@ -32,17 +29,12 @@ export default class OrganizationService {
     return next(new AppError("Unauthorized access", statusCode.unauthorized()));
   }
 
-  public async getOrganization(
-    req: any,
-    next: NextFunction
-  ): Promise<IUser | void> {
+  public async getOrganization(req: any, next: NextFunction): Promise<IUser | void> {
     const user = req.user;
     const { organizationId } = req.params;
     if (user) {
       let organization = await userRepository.findUserById(organizationId);
-      const arrayOfEvents = await eventsRepository.findAllOrganizationsEvent(
-        organizationId
-      );
+      const arrayOfEvents = await eventsRepository.findAllOrganizationsEvent(organizationId);
       if (organization) {
         return { organization, arrayOfEvents } as any;
       }
@@ -51,10 +43,7 @@ export default class OrganizationService {
     return next(new AppError("Unauthorized access", statusCode.unauthorized()));
   }
 
-  public async createEvent(
-    req: any,
-    next: NextFunction
-  ): Promise<IEvent | void> {
+  public async createEvent(req: any, next: NextFunction): Promise<IEvent | void> {
     const user = req.user;
     const payload: IEvent = {
       owner: user.id,
@@ -70,14 +59,10 @@ export default class OrganizationService {
         notificationType: "Create Event",
         notificationMessage: "Created a new Event",
       };
-      const notificationData = await notificationRepository.createNotification(
-        notificationPayload
-      );
+      const notificationData = await notificationRepository.createNotification(notificationPayload);
       if (notificationData) {
         // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-        const result = await notificationRepository.firebaseInsertNotification(
-          notificationData
-        );
+        const result = await notificationRepository.firebaseInsertNotification(notificationData);
         return eventData as IEvent;
       }
     }
@@ -90,40 +75,27 @@ export default class OrganizationService {
     const payload: IEvent = {
       ...req.body,
     };
-    const eventData = await eventsRepository.findEventByIdAndUpdate(
-      eventId,
-      payload
-    );
+    const eventData = await eventsRepository.findEventByIdAndUpdate(eventId, payload);
     //if event is edited successfully then insert into notification schema and then send notification
     if (eventData) {
       // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-      const result = await eventsRepository.firebaseUpdateEvent(
-        eventId,
-        eventData
-      );
+      const result = await eventsRepository.firebaseUpdateEvent(eventId, eventData);
       const notificationPayload: INotification = {
         senderId: user.id,
         notificationType: "Edit Event",
         notificationMessage: "Edited an event",
       };
-      const notificationData = await notificationRepository.createNotification(
-        notificationPayload
-      );
+      const notificationData = await notificationRepository.createNotification(notificationPayload);
       if (notificationData) {
         // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-        const result = await notificationRepository.firebaseInsertNotification(
-          notificationData
-        );
+        const result = await notificationRepository.firebaseInsertNotification(notificationData);
         return eventData as IEvent;
       }
     }
     return next(new AppError("Failed to edit event", statusCode.conflict()));
   }
 
-  public async cancelEvent(
-    req: any,
-    next: NextFunction
-  ): Promise<IEvent | void> {
+  public async cancelEvent(req: any, next: NextFunction): Promise<IEvent | void> {
     const user = req.user;
     const { eventId } = req.params;
     const eventData = await eventsRepository.deleteEvent(eventId);
@@ -136,14 +108,10 @@ export default class OrganizationService {
         notificationType: "Cancel Event",
         notificationMessage: "Cancelled an event",
       };
-      const notificationData = await notificationRepository.createNotification(
-        notificationPayload
-      );
+      const notificationData = await notificationRepository.createNotification(notificationPayload);
       if (notificationData) {
         // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-        const result = await notificationRepository.firebaseInsertNotification(
-          notificationData
-        );
+        const result = await notificationRepository.firebaseInsertNotification(notificationData);
         return eventData as IEvent;
       }
     }
@@ -156,40 +124,27 @@ export default class OrganizationService {
     const payload: IEvent = {
       status: "history",
     };
-    const eventData = await eventsRepository.findEventByIdAndUpdate(
-      eventId,
-      payload
-    );
+    const eventData = await eventsRepository.findEventByIdAndUpdate(eventId, payload);
     //if event is ended successfully then insert into notification schema and then send notification
     if (eventData) {
       // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-      const result = await eventsRepository.firebaseUpdateEvent(
-        eventId,
-        eventData
-      );
+      const result = await eventsRepository.firebaseUpdateEvent(eventId, eventData);
       const notificationPayload: INotification = {
         senderId: user.id,
         notificationType: "End Event",
         notificationMessage: "Just closed an event",
       };
-      const notificationData = await notificationRepository.createNotification(
-        notificationPayload
-      );
+      const notificationData = await notificationRepository.createNotification(notificationPayload);
       if (notificationData) {
         // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-        const result = await notificationRepository.firebaseInsertNotification(
-          notificationData
-        );
+        const result = await notificationRepository.firebaseInsertNotification(notificationData);
         return eventData as IEvent;
       }
     }
     return next(new AppError("Failed to end event", statusCode.conflict()));
   }
 
-  public async getAllOrganizationsEvent(
-    req: any,
-    next: NextFunction
-  ): Promise<IEvent | void> {
+  public async getAllOrganizationsEvent(req: any, next: NextFunction): Promise<IEvent | void> {
     const user = req.user;
     const eventData = await eventsRepository.findAllOrganizationsEvent(user.id);
     if (eventData) {
@@ -198,10 +153,7 @@ export default class OrganizationService {
     return next(new AppError("Failed to get events", statusCode.conflict()));
   }
 
-  public async getAllOrganizationsMembers(
-    req: any,
-    next: NextFunction
-  ): Promise<IUser[] | void> {
+  public async getAllOrganizationsMembers(req: any, next: NextFunction): Promise<IUser[] | void> {
     const user = req.user;
     const organization = await userRepository.findUserById(user.id);
     const members = organization?.members;
@@ -211,18 +163,12 @@ export default class OrganizationService {
     return next(new AppError("Failed to members", statusCode.conflict()));
   }
 
-  public async addMemberRequest(
-    req: any,
-    next: NextFunction
-  ): Promise<INotification | void> {
+  public async addMemberRequest(req: any, next: NextFunction): Promise<INotification | void> {
     const user = req.user;
     const { memberId } = req.params;
     const organization = await userRepository.findUserById(user.id);
     const members = organization?.members;
-    if (
-      members?.length !== 0 &&
-      members?.some((item: any) => item.id === memberId)
-    ) {
+    if (members?.length !== 0 && members?.some((item: any) => item.id === memberId)) {
       return next(new AppError("Already a member", statusCode.conflict()));
     }
     const payload: INotification = {
@@ -231,42 +177,27 @@ export default class OrganizationService {
       notificationType: "Add Elector Request",
       notificationMessage: "Wants you to join their Organization",
     };
-    const notificationData = await notificationRepository.createNotification(
-      payload
-    );
+    const notificationData = await notificationRepository.createNotification(payload);
     if (notificationData) {
       // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-      const result = await notificationRepository.firebaseInsertNotification(
-        notificationData
-      );
+      const result = await notificationRepository.firebaseInsertNotification(notificationData);
       return notificationData as INotification;
     }
     return next(new AppError("Failed to send request", statusCode.conflict()));
   }
 
-  public async removeMember(
-    req: any,
-    next: NextFunction
-  ): Promise<IUser | void> {
+  public async removeMember(req: any, next: NextFunction): Promise<IUser | void> {
     const user = req.user;
     const { memberId } = req.params;
     const organization = await userRepository.findUserById(user.id);
     const members = organization?.members;
-    if (
-      members?.length === 0 ||
-      members?.some((item: any) => item.id !== memberId)
-    ) {
-      return next(
-        new AppError("This User is not your member", statusCode.conflict())
-      );
+    if (members?.length === 0 || members?.some((item: any) => item.id !== memberId)) {
+      return next(new AppError("This User is not your member", statusCode.conflict()));
     }
     // Remove member from organization's members list
     const deletedMember = await userRepository.removeMember(user.id, memberId);
     // Remove organization from elector's organizations list
-    const deleteOrganization = await userRepository.removeOrganization(
-      memberId,
-      user.id
-    );
+    const deleteOrganization = await userRepository.removeOrganization(memberId, user.id);
     //if member is removed successfully then insert into notification schema and then send notification
     if (deletedMember && deleteOrganization) {
       const notificationPayload: INotification = {
@@ -275,105 +206,65 @@ export default class OrganizationService {
         notificationType: "Remove Member",
         notificationMessage: "Removed you from their organization",
       };
-      const notificationData = await notificationRepository.createNotification(
-        notificationPayload
-      );
+      const notificationData = await notificationRepository.createNotification(notificationPayload);
       if (notificationData) {
         // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-        const result = await notificationRepository.firebaseInsertNotification(
-          notificationData
-        );
+        const result = await notificationRepository.firebaseInsertNotification(notificationData);
         return deletedMember as IUser;
       }
     }
     return next(new AppError("Failed to remove member", statusCode.conflict()));
   }
 
-  public async ignoreRequest(
-    req: any,
-    next: NextFunction
-  ): Promise<INotification | void> {
+  public async ignoreRequest(req: any, next: NextFunction): Promise<INotification | void> {
     const user = req.user;
     const { notificationId } = req.params;
     //Get Details of this notification
-    const notification = await notificationRepository.findOneNotification(
-      notificationId
-    );
+    const notification = await notificationRepository.findOneNotification(notificationId);
     if (!notification) {
-      return next(
-        new AppError("Notification doesn't exist", statusCode.notFound())
-      );
+      return next(new AppError("Notification doesn't exist", statusCode.notFound()));
     }
     const payload: INotification = {
       senderId: notification.senderId,
       isSettled: true,
     };
-    const updatedNotification =
-      await notificationRepository.findNotificationByIdAndUpdate(
-        notificationId,
-        payload
-      );
+    const updatedNotification = await notificationRepository.findNotificationByIdAndUpdate(
+      notificationId,
+      payload
+    );
     if (updatedNotification) {
       // FIREBASE REALTIME UPDATE DATABASE NOTIFICATIONS
-      const result = await notificationRepository.firebaseUpdateNotification(
-        notificationId
-      );
+      const result = await notificationRepository.firebaseUpdateNotification(notificationId);
       return updatedNotification;
     }
-    return next(
-      new AppError("Failed to ignore request", statusCode.conflict())
-    );
+    return next(new AppError("Failed to ignore request", statusCode.conflict()));
   }
 
-  public async acceptRequest(
-    req: any,
-    next: NextFunction
-  ): Promise<INotification | void> {
+  public async acceptRequest(req: any, next: NextFunction): Promise<INotification | void> {
     const user = req.user;
     const { notificationId } = req.params;
     //Get Details of this notification
-    const notification = await notificationRepository.findOneNotification(
-      notificationId
-    );
+    const notification = await notificationRepository.findOneNotification(notificationId);
     if (!notification) {
-      return next(
-        new AppError("Notification doesn't exist", statusCode.notFound())
-      );
+      return next(new AppError("Notification doesn't exist", statusCode.notFound()));
     }
     if (notification.notificationType !== "Join Organization Request") {
-      return next(
-        new AppError("This Request is wrong", statusCode.badRequest())
-      );
+      return next(new AppError("This Request is wrong", statusCode.badRequest()));
     }
     if (notification.isSettled === true) {
-      return next(
-        new AppError("Notification is Settled", statusCode.badRequest())
-      );
+      return next(new AppError("Notification is Settled", statusCode.badRequest()));
     }
     // Add elector to organization's member list
-    const addMember = await userRepository.addMember(
-      user.id,
-      notification.senderId
-    );
+    const addMember = await userRepository.addMember(user.id, notification.senderId);
     if (!addMember) {
-      return next(
-        new AppError("Couldn't accept Elector", statusCode.notImplemented())
-      );
+      return next(new AppError("Couldn't accept Elector", statusCode.notImplemented()));
     }
     // Add organization to elector's organization list
-    const addOrganization = await userRepository.addOrganization(
-      notification.senderId,
-      user.id
-    );
+    const addOrganization = await userRepository.addOrganization(notification.senderId, user.id);
     if (!addOrganization) {
       // if Add member is not successful then remove organization back
-      const removeMember = await userRepository.removeMember(
-        user.id,
-        notification.senderId
-      );
-      return next(
-        new AppError("Couldn't accept Elector", statusCode.badRequest())
-      );
+      const removeMember = await userRepository.removeMember(user.id, notification.senderId);
+      return next(new AppError("Couldn't accept Elector", statusCode.badRequest()));
     }
     //If we have successfully added both organization and members into each others document then create notifications
     const notificationPayload: INotification = {
@@ -382,37 +273,27 @@ export default class OrganizationService {
       notificationType: "Accept Request",
       notificationMessage: "Accepted request to join your organization",
     };
-    const notificationData = await notificationRepository.createNotification(
-      notificationPayload
-    );
+    const notificationData = await notificationRepository.createNotification(notificationPayload);
     if (notificationData) {
       // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-      const result = await notificationRepository.firebaseInsertNotification(
-        notificationData
-      );
+      const result = await notificationRepository.firebaseInsertNotification(notificationData);
       const payload: INotification = {
         senderId: notification.senderId,
         isSettled: true,
       };
-      const updatedNotification =
-        await notificationRepository.findNotificationByIdAndUpdate(
-          notificationId,
-          payload
-        );
+      const updatedNotification = await notificationRepository.findNotificationByIdAndUpdate(
+        notificationId,
+        payload
+      );
       if (updatedNotification) {
         // FIREBASE REALTIME UPDATE DATABASE NOTIFICATIONS
-        const result = await notificationRepository.firebaseUpdateNotification(
-          notificationId
-        );
+        const result = await notificationRepository.firebaseUpdateNotification(notificationId);
         return updatedNotification;
       }
     }
   }
 
-  public async uploadLogoImage(
-    req: any,
-    next: NextFunction
-  ): Promise<IUser | void> {
+  public async uploadLogoImage(req: any, next: NextFunction): Promise<IUser | void> {
     const user = req.user;
     const file = req.file;
     if (!file) {
@@ -422,15 +303,10 @@ export default class OrganizationService {
     const payload: any = {
       logo: fileDestination,
     };
-    const updatedUser = await userRepository.findUserByIdAndUpdate(
-      user.id,
-      payload
-    );
+    const updatedUser = await userRepository.findUserByIdAndUpdate(user.id, payload);
     if (updatedUser) {
       return updatedUser;
     }
-    return next(
-      new AppError(`Image Upload failed`, statusCode.notImplemented())
-    );
+    return next(new AppError(`Image Upload failed`, statusCode.notImplemented()));
   }
 }

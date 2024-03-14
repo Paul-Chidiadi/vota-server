@@ -16,10 +16,7 @@ const util = new Utilities();
 const mail = new MalierService();
 
 export default class ElectorService {
-  public async getAllElector(
-    req: any,
-    next: NextFunction
-  ): Promise<IUser[] | void> {
+  public async getAllElector(req: any, next: NextFunction): Promise<IUser[] | void> {
     const user = req.user;
     if (user) {
       const role = "Elector";
@@ -44,12 +41,9 @@ export default class ElectorService {
         //LOOP THROUGH ORGANIZATIONS ARRAY AND GET THEIR EVENTS EACH
         for (let org = 0; org < organizations.length; org++) {
           const organizationId = organizations[org];
-          const arrayOfEvents =
-            await eventsRepository.findAllOrganizationsEvent(organizationId);
+          const arrayOfEvents = await eventsRepository.findAllOrganizationsEvent(organizationId);
           if (!arrayOfEvents) {
-            return next(
-              new AppError("Failed to get events", statusCode.conflict())
-            );
+            return next(new AppError("Failed to get events", statusCode.conflict()));
           }
           eventData.push(...arrayOfEvents);
         }
@@ -62,10 +56,7 @@ export default class ElectorService {
     return next(new AppError("Unauthorized access", statusCode.unauthorized()));
   }
 
-  public async getAllElectorsOrganization(
-    req: any,
-    next: NextFunction
-  ): Promise<IUser[] | void> {
+  public async getAllElectorsOrganization(req: any, next: NextFunction): Promise<IUser[] | void> {
     const user = req.user;
     const elector = await userRepository.findUserById(user.id);
     const organizations = elector?.organizations;
@@ -75,10 +66,7 @@ export default class ElectorService {
     return next(new AppError("Failed to organizations", statusCode.conflict()));
   }
 
-  public async getAllElectorsEvent(
-    req: any,
-    next: NextFunction
-  ): Promise<IEvent | void> {
+  public async getAllElectorsEvent(req: any, next: NextFunction): Promise<IEvent | void> {
     const user = req.user;
     //GET ELECTORS ORGANIZATIONS
     const elector = await userRepository.findUserById(user.id);
@@ -88,13 +76,9 @@ export default class ElectorService {
       //LOOP THROUGH ORGANIZATIONS ARRAY AND GET THEIR EVENTS EACH
       for (let org = 0; org < organizations.length; org++) {
         const organizationId = organizations[org];
-        const arrayOfEvents = await eventsRepository.findAllOrganizationsEvent(
-          organizationId
-        );
+        const arrayOfEvents = await eventsRepository.findAllOrganizationsEvent(organizationId);
         if (!arrayOfEvents) {
-          return next(
-            new AppError("Failed to get events", statusCode.conflict())
-          );
+          return next(new AppError("Failed to get events", statusCode.conflict()));
         }
         eventData.push(...arrayOfEvents);
       }
@@ -125,23 +109,16 @@ export default class ElectorService {
       notificationType: "Join Organization Request",
       notificationMessage: "Wants to join your Organization",
     };
-    const notificationData = await notificationRepository.createNotification(
-      payload
-    );
+    const notificationData = await notificationRepository.createNotification(payload);
     if (notificationData) {
       // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-      const result = await notificationRepository.firebaseInsertNotification(
-        notificationData
-      );
+      const result = await notificationRepository.firebaseInsertNotification(notificationData);
       return notificationData as INotification;
     }
     return next(new AppError("Failed to send request", statusCode.conflict()));
   }
 
-  public async leaveOrganization(
-    req: any,
-    next: NextFunction
-  ): Promise<IUser | void> {
+  public async leaveOrganization(req: any, next: NextFunction): Promise<IUser | void> {
     const user = req.user;
     const { organizationId } = req.params;
     const elector = await userRepository.findUserById(user.id);
@@ -152,15 +129,9 @@ export default class ElectorService {
       organizations?.some((item: any) => item.id === organizationId)
     ) {
       // Remove organization from elector's organizations list
-      const deleteOrganization = await userRepository.removeOrganization(
-        user.id,
-        organizationId
-      );
+      const deleteOrganization = await userRepository.removeOrganization(user.id, organizationId);
       // Remove member from organization's members list
-      const deletedMember = await userRepository.removeMember(
-        organizationId,
-        user.id
-      );
+      const deletedMember = await userRepository.removeMember(organizationId, user.id);
       //if organization is left successfully then insert into notification schema and then send notification
       if (deleteOrganization && deletedMember) {
         const notificationPayload: INotification = {
@@ -169,117 +140,72 @@ export default class ElectorService {
           notificationType: "Leave Organization",
           notificationMessage: "Left your Organization",
         };
-        const notificationData =
-          await notificationRepository.createNotification(notificationPayload);
+        const notificationData = await notificationRepository.createNotification(
+          notificationPayload
+        );
         if (notificationData) {
           // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-          const result =
-            await notificationRepository.firebaseInsertNotification(
-              notificationData
-            );
+          const result = await notificationRepository.firebaseInsertNotification(notificationData);
           return deletedMember as IUser;
         }
       }
-      return next(
-        new AppError("Failed to leave organization", statusCode.conflict())
-      );
+      return next(new AppError("Failed to leave organization", statusCode.conflict()));
     }
-    return next(
-      new AppError(
-        "You are not part of this organization",
-        statusCode.conflict()
-      )
-    );
+    return next(new AppError("You are not part of this organization", statusCode.conflict()));
   }
 
-  public async ignoreRequest(
-    req: any,
-    next: NextFunction
-  ): Promise<INotification | void> {
+  public async ignoreRequest(req: any, next: NextFunction): Promise<INotification | void> {
     const user = req.user;
     const { notificationId } = req.params;
     //Get Details of this notification
-    const notification = await notificationRepository.findOneNotification(
-      notificationId
-    );
+    const notification = await notificationRepository.findOneNotification(notificationId);
     if (!notification) {
-      return next(
-        new AppError("Notification doesn't exist", statusCode.notFound())
-      );
+      return next(new AppError("Notification doesn't exist", statusCode.notFound()));
     }
     const payload: INotification = {
       senderId: notification.senderId,
       isSettled: true,
     };
-    const updatedNotification =
-      await notificationRepository.findNotificationByIdAndUpdate(
-        notificationId,
-        payload
-      );
+    const updatedNotification = await notificationRepository.findNotificationByIdAndUpdate(
+      notificationId,
+      payload
+    );
     if (updatedNotification) {
       // FIREBASE REALTIME UPDATE DATABASE NOTIFICATIONS
-      const result = await notificationRepository.firebaseUpdateNotification(
-        notificationId
-      );
+      const result = await notificationRepository.firebaseUpdateNotification(notificationId);
       return updatedNotification;
     }
-    return next(
-      new AppError("Failed to ignore request", statusCode.conflict())
-    );
+    return next(new AppError("Failed to ignore request", statusCode.conflict()));
   }
 
-  public async acceptRequest(
-    req: any,
-    next: NextFunction
-  ): Promise<INotification | void> {
+  public async acceptRequest(req: any, next: NextFunction): Promise<INotification | void> {
     const user = req.user;
     const { notificationId } = req.params;
     //Get Details of this notification
-    const notification = await notificationRepository.findOneNotification(
-      notificationId
-    );
+    const notification = await notificationRepository.findOneNotification(notificationId);
     if (!notification) {
-      return next(
-        new AppError("Notification doesn't exist", statusCode.notFound())
-      );
+      return next(new AppError("Notification doesn't exist", statusCode.notFound()));
     }
     if (notification.notificationType !== "Add Elector Request") {
-      return next(
-        new AppError("This Request is wrong", statusCode.badRequest())
-      );
+      return next(new AppError("This Request is wrong", statusCode.badRequest()));
     }
     if (notification.isSettled === true) {
-      return next(
-        new AppError("Notification is Settled", statusCode.badRequest())
-      );
+      return next(new AppError("Notification is Settled", statusCode.badRequest()));
     }
     // Add organization to elector's organizations list
-    const addOrganization = await userRepository.addOrganization(
-      user.id,
-      notification.senderId
-    );
+    const addOrganization = await userRepository.addOrganization(user.id, notification.senderId);
     if (!addOrganization) {
-      return next(
-        new AppError(
-          "Couldn't accept Organization",
-          statusCode.notImplemented()
-        )
-      );
+      return next(new AppError("Couldn't accept Organization", statusCode.notImplemented()));
     }
     // Add member to organization's members list
-    const addMember = await userRepository.addMember(
-      notification.senderId,
-      user.id
-    );
+    const addMember = await userRepository.addMember(notification.senderId, user.id);
     if (!addMember) {
       // if Add member is not successful then remove organization back
       const removeOrganization = await userRepository.removeOrganization(
         user.id,
         notification.senderId
       );
-      return next(
-        new AppError("Couldn't accept Organization", statusCode.badRequest())
-      );
+      return next(new AppError("Couldn't accept Organization", statusCode.badRequest()));
     }
     //If we have successfully added both organization and members into each others document then create notifications
     const notificationPayload: INotification = {
@@ -288,29 +214,22 @@ export default class ElectorService {
       notificationType: "Accept Request",
       notificationMessage: "Accepted request to become your member",
     };
-    const notificationData = await notificationRepository.createNotification(
-      notificationPayload
-    );
+    const notificationData = await notificationRepository.createNotification(notificationPayload);
 
     if (notificationData) {
       // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-      const result = await notificationRepository.firebaseInsertNotification(
-        notificationData
-      );
+      const result = await notificationRepository.firebaseInsertNotification(notificationData);
       const payload: INotification = {
         senderId: notification.senderId,
         isSettled: true,
       };
-      const updatedNotification =
-        await notificationRepository.findNotificationByIdAndUpdate(
-          notificationId,
-          payload
-        );
+      const updatedNotification = await notificationRepository.findNotificationByIdAndUpdate(
+        notificationId,
+        payload
+      );
       if (updatedNotification) {
         // FIREBASE REALTIME UPDATE DATABASE NOTIFICATIONS
-        const result = await notificationRepository.firebaseUpdateNotification(
-          notificationId
-        );
+        const result = await notificationRepository.firebaseUpdateNotification(notificationId);
         return updatedNotification;
       }
     }
@@ -331,11 +250,9 @@ export default class ElectorService {
       eventData.pollQuestions.length > 0
     ) {
       //GET PARTICULAR QUESTION ID IN THE POLLQUESTIONS ARRAY
-      const questionBeingVotedFor = eventData.pollQuestions.filter(
-        (item: any) => {
-          return item._id.toString() === questionId;
-        }
-      );
+      const questionBeingVotedFor = eventData.pollQuestions.filter((item: any) => {
+        return item._id.toString() === questionId;
+      });
       const questionTitle = questionBeingVotedFor[0].question;
       const numberOfVotes = questionBeingVotedFor[0].voteCount;
       const votersArray = questionBeingVotedFor[0].voters;
@@ -343,23 +260,21 @@ export default class ElectorService {
         obj.voters.some((voter: any) => voter._id.toString() === user.id)
       );
       if (includesUserInformation) {
-        return next(
-          new AppError("Vote already casted", statusCode.badRequest())
-        );
+        return next(new AppError("Vote already casted", statusCode.badRequest()));
       }
       const payload: any = {
         question: questionTitle,
         voters: [...votersArray, user.id],
         voteCount: Number(numberOfVotes) + 1,
       };
-      const updatedPollQuestion: any =
-        await eventsRepository.updatePollQuestion(eventId, questionId, payload);
+      const updatedPollQuestion: any = await eventsRepository.updatePollQuestion(
+        eventId,
+        questionId,
+        payload
+      );
       if (updatedPollQuestion) {
         // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-        const result = await eventsRepository.firebaseUpdateEvent(
-          eventId,
-          updatedPollQuestion
-        );
+        const result = await eventsRepository.firebaseUpdateEvent(eventId, updatedPollQuestion);
         return updatedPollQuestion as any;
       }
     }
@@ -371,11 +286,9 @@ export default class ElectorService {
       eventData.candidates.length > 0
     ) {
       //GET PARTICULAR POSITION ID IN THE CANDIDATE ARRAY
-      const candidateBeingVotedFor = eventData.candidates.filter(
-        (item: any) => {
-          return item._id.toString() === positionId;
-        }
-      );
+      const candidateBeingVotedFor = eventData.candidates.filter((item: any) => {
+        return item._id.toString() === positionId;
+      });
       const runfor = candidateBeingVotedFor[0].runfor;
       const candidateId = candidateBeingVotedFor[0].candidateId;
       const numberOfVotes = candidateBeingVotedFor[0].voteCount;
@@ -384,16 +297,9 @@ export default class ElectorService {
       //CHECK IF USER HAS VOTED ALREADY
       const hasVoted = eventData.candidates
         .filter((obj: any) => obj.runfor === runfor)
-        .some((obj: any) =>
-          obj.voters.some((voter: any) => voter._id.toString() === user.id)
-        );
+        .some((obj: any) => obj.voters.some((voter: any) => voter._id.toString() === user.id));
       if (hasVoted) {
-        return next(
-          new AppError(
-            `Vote already casted for ${runfor}`,
-            statusCode.badRequest()
-          )
-        );
+        return next(new AppError(`Vote already casted for ${runfor}`, statusCode.badRequest()));
       }
       const payload: any = {
         runfor: runfor,
@@ -408,23 +314,15 @@ export default class ElectorService {
       );
       if (updatedCandidate) {
         // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
-        const result = await eventsRepository.firebaseUpdateEvent(
-          eventId,
-          updatedCandidate
-        );
+        const result = await eventsRepository.firebaseUpdateEvent(eventId, updatedCandidate);
         return updatedCandidate as any;
       }
     }
 
-    return next(
-      new AppError(`Couldn't cast vote`, statusCode.notImplemented())
-    );
+    return next(new AppError(`Couldn't cast vote`, statusCode.notImplemented()));
   }
 
-  public async uploadProfileImage(
-    req: any,
-    next: NextFunction
-  ): Promise<IUser | void> {
+  public async uploadProfileImage(req: any, next: NextFunction): Promise<IUser | void> {
     const user = req.user;
     const file = req.file;
     if (!file) {
@@ -434,15 +332,10 @@ export default class ElectorService {
     const payload: any = {
       displayPicture: fileDestination,
     };
-    const updatedUser = await userRepository.findUserByIdAndUpdate(
-      user.id,
-      payload
-    );
+    const updatedUser = await userRepository.findUserByIdAndUpdate(user.id, payload);
     if (updatedUser) {
       return updatedUser;
     }
-    return next(
-      new AppError(`Image Upload failed`, statusCode.notImplemented())
-    );
+    return next(new AppError(`Image Upload failed`, statusCode.notImplemented()));
   }
 }
