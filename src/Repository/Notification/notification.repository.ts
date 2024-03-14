@@ -10,6 +10,7 @@ export default class EventRepository {
     );
     if (populatedNotification) {
       populatedNotification.info = {
+        id: populatedNotification && populatedNotification?.senderId._id.toString(),
         name:
           populatedNotification && populatedNotification?.senderId.companyName
             ? populatedNotification?.senderId.companyName
