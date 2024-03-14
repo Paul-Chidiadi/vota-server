@@ -5,9 +5,22 @@ import firebaseDB from "../../firebase-config";
 export default class EventRepository {
   async createNotification(payload: INotification): Promise<INotification> {
     const notification: any = await Notification.create(payload);
-    const populatedNotification = await Notification.findById(notification._id).populate(
+    const populatedNotification: any = await Notification.findById(notification._id).populate(
       "senderId"
     );
+    if (populatedNotification) {
+      populatedNotification.info = {
+        name:
+          populatedNotification && populatedNotification?.senderId.companyName
+            ? populatedNotification?.senderId.companyName
+            : populatedNotification?.senderId.fullName,
+        image:
+          populatedNotification && populatedNotification?.senderId.logo
+            ? populatedNotification?.senderId.logo
+            : populatedNotification?.senderId.displayPicture,
+        email: populatedNotification && populatedNotification?.senderId.email,
+      };
+    }
     return populatedNotification as any;
   }
 
@@ -34,7 +47,7 @@ export default class EventRepository {
     const notificationsRef = ref(firebaseDB, `notifications/${notificationData.id?.toString()}`);
     const result = await set(notificationsRef, {
       id: notificationData.id,
-      senderId: String(notificationData.senderId),
+      senderId: notificationData.info,
       recipientId: String(notificationData.recipientId),
       notificationType: notificationData.notificationType,
       notificationMessage: notificationData.notificationMessage,

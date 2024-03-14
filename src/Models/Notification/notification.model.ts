@@ -7,6 +7,7 @@ export interface INotification {
   notificationType?: string;
   notificationMessage?: string;
   isSettled?: boolean;
+  info?: any;
 }
 
 const notificationSchema = new mongoose.Schema({
