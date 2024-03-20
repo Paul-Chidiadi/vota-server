@@ -7,11 +7,18 @@ import multer from "multer";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import mongoose, { ObjectId } from "mongoose";
 import UserRepository from "../Repository/Users/user.repository";
+import cron from "node-cron";
+import { Event, IEvent } from "../Models/Events/events.model";
+import EventRepository from "../Repository/Events/events.repository";
+import NotificationRepository from "../Repository/Notification/notification.repository";
+import { INotification } from "../Models/Notification/notification.model";
 // import CryptoJS from "crypto-js";
 // import { v2 as cloudinary } from 'cloudinary';
 // import { customAlphabet } from 'nanoid';
 
 const userRepository = new UserRepository();
+const eventsRepository = new EventRepository();
+const notificationRepository = new NotificationRepository();
 
 export default class Utilities {
   private pepper = String(process.env.BCRYPT_PASSWORD);
@@ -34,6 +41,64 @@ export default class Utilities {
     }
   }
 
+  public async updateEventStatus() {
+    // Define a cron job to run at 12 AM every day
+    cron.schedule("0 0 * * *", async () => {
+      try {
+        // Get the current date
+        const currentDate = new Date();
+        // Set the time to the beginning of the day (00:00:00)
+        currentDate.setUTCHours(0, 0, 0, 0);
+
+        // Get the end of the day (23:59:59)
+        const endOfDay = new Date(currentDate);
+        endOfDay.setUTCHours(23, 59, 59, 999);
+
+        // Find events occurring on the current date
+        const events = await Event.find({
+          // Match events whose dateTime falls within the current day
+          schedule: {
+            $gte: currentDate.toISOString(), // Greater than or equal to the start of the day
+            $lte: endOfDay.toISOString(), // Less than or equal to the end of the day
+          },
+          status: { $ne: "ongoing" }, // Exclude events already marked as ongoing
+        });
+
+        // Update the status of ongoing events
+        for (const event of events) {
+          const eventData: any = await Event.findByIdAndUpdate(
+            { _id: event._id },
+            { status: "ongoing" },
+            {
+              new: true,
+            }
+          ).exec();
+
+          if (eventData) {
+            //If status has been updated then update on firebase, create and insert notifications for both mongoDb and firebase
+            const result = await eventsRepository.firebaseUpdateEvent(eventData._id, eventData);
+            const notificationPayload: INotification = {
+              senderId: eventData.owner,
+              notificationType: "Event Started",
+              notificationMessage: "Has an event starting today",
+            };
+            const notificationData = await notificationRepository.createNotification(
+              notificationPayload
+            );
+            if (notificationData) {
+              // FIREBASE REALTIME DATABASE PUSH NOTIFICATION
+              const result = await notificationRepository.firebaseInsertNotification(
+                notificationData
+              );
+            }
+          }
+        }
+      } catch (error) {
+        throw error;
+      }
+    });
+  }
+
   public async generateHash(plainPassword: string): Promise<string> {
     const hash = await bcrypt.hash(plainPassword + this.pepper, this.saltRound);
     return hash;
@@ -49,9 +114,7 @@ export default class Utilities {
   }
 
   generateRandomCode = (size = 8, alpha = true): number | string => {
-    const characters = alpha
-      ? "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-"
-      : "0123456789";
+    const characters = alpha ? "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-" : "0123456789";
     const chars = characters.split("");
     let selections = "";
     for (let i = 0; i < size; i += 1) {
@@ -83,10 +146,7 @@ export default class Utilities {
     return result;
   }
 
-  async comparePassword(
-    password: string,
-    hashPassword: string
-  ): Promise<boolean> {
+  async comparePassword(password: string, hashPassword: string): Promise<boolean> {
     const result = await bcrypt.compare(password + this.pepper, hashPassword);
     return result;
   }

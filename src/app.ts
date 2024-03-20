@@ -11,6 +11,8 @@ import path from "path";
 
 import AppError from "./Utilities/Errors/appError";
 import { errorHandler } from "./Middlewares/Errors/errorMiddleware";
+import Utilities, { statusCode } from "./Utilities/utils";
+const util = new Utilities();
 import router from "./Routes/index";
 
 dotenv.config();
@@ -86,6 +88,8 @@ const server = app.listen(PORT, async () => {
         ? console.log(`Connection to FIREBASE DB successful`)
         : console.log("Connection to FIREBASE DB failed");
       console.log(`Server started on PORT https://localhost:${address}`);
+      //RUN THE CRON JOB FOR CHECKING IF EVENT DATE HAS REACHED AND UPDATE EVENT STATUS
+      await util.updateEventStatus();
     } catch (error) {
       console.log(`Trouble connecting to Database with error: ${error}`);
     }
